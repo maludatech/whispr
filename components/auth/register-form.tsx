@@ -16,7 +16,7 @@ export function RegisterForm() {
     <form action={formAction} className="space-y-4" noValidate>
       <div className="space-y-1.5">
         <Label htmlFor="username">Username</Label>
-        <div className="flex items-center gap-2">
+        <div className="flex h-11 items-center gap-1 rounded-xl border border-input bg-input/30 pl-3 has-focus-visible:border-ring has-focus-visible:ring-3 has-focus-visible:ring-ring/50">
           <span className="text-sm text-muted-foreground">whispr.app/</span>
           <Input
             id="username"
@@ -24,6 +24,7 @@ export function RegisterForm() {
             placeholder="yourname"
             autoComplete="username"
             required
+            className="h-full border-0 bg-transparent px-0 focus-visible:ring-0"
           />
         </div>
         {state?.errors?.username && (
@@ -40,6 +41,7 @@ export function RegisterForm() {
           placeholder="you@example.com"
           autoComplete="email"
           required
+          className="h-11 rounded-xl"
         />
         {state?.errors?.email && (
           <p className="text-xs text-destructive">{state.errors.email[0]}</p>
@@ -55,6 +57,7 @@ export function RegisterForm() {
           placeholder="At least 8 characters"
           autoComplete="new-password"
           required
+          className="h-11 rounded-xl"
         />
         {state?.errors?.password && (
           <p className="text-xs text-destructive">{state.errors.password[0]}</p>

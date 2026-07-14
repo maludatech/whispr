@@ -27,7 +27,10 @@
       "Bash(rm screenshot.mjs)",
       "Bash(node e2e.mjs)",
       "Bash(rm e2e.mjs)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "Bash(node seed-and-shoot.mjs)",
+      "Bash(sed -i 's#http://localhost:3001#http://localhost:3000#' seed-and-shoot.mjs)",
+      "Bash(rm -f seed-and-shoot.mjs)"
     ]
   }
 }

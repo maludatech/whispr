@@ -23,6 +23,7 @@ export function LoginForm() {
           placeholder="you@example.com"
           autoComplete="email"
           required
+          className="h-11 rounded-xl"
         />
         {state?.errors?.email && (
           <p className="text-xs text-destructive">{state.errors.email[0]}</p>
@@ -38,6 +39,7 @@ export function LoginForm() {
           placeholder="Your password"
           autoComplete="current-password"
           required
+          className="h-11 rounded-xl"
         />
         {state?.errors?.password && (
           <p className="text-xs text-destructive">{state.errors.password[0]}</p>

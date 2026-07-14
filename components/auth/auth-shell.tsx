@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackgroundBlobs } from "@/components/decor/background-blobs";
 
 export function AuthShell({
   eyebrow,
@@ -15,18 +16,7 @@ export function AuthShell({
 }) {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 -left-32 size-144 rounded-full bg-violet-600/50 blur-[100px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-1/3 -right-40 size-144 rounded-full bg-fuchsia-500/40 blur-[100px]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 left-1/4 size-120 rounded-full bg-amber-400/30 blur-[100px]"
-      />
+      <BackgroundBlobs />
 
       <div className="relative w-full max-w-md">
         <div className="mb-8 text-center">
