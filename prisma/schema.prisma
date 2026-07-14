@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  username  String    @unique
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  messages  Message[]
+}
+
+enum MessageType {
+  text
+  image
+  audio
+  video
+}
+
+model Message {
+  id         String      @id @default(uuid())
+  receiverId String
+  receiver   User        @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  type       MessageType
+  content    String?
+  mediaUrl   String?
+  createdAt  DateTime    @default(now())
+
+  @@index([receiverId])
+}

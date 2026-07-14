@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Whispr
 
-## Getting Started
+Whispr is a playful anonymous multimedia sharing platform — think NGL.link, but
+visitors can send text, images, audio, or video to your personal link.
+Nothing about the sender is ever stored.
 
-First, run the development server:
+## How it works
+
+1. Create an account and get a personal link: `whispr.vercel.app/your-username`
+2. Share the link anywhere
+3. Anyone who visits can send you a text, image, audio, or video message —
+   completely anonymously
+4. View everything you've received in your private dashboard
+
+## Stack
+
+- [Next.js 16](https://nextjs.org) (App Router) + TypeScript
+- [TailwindCSS v4](https://tailwindcss.com) + [ShadCN UI](https://ui.shadcn.com)
+- [Prisma ORM](https://www.prisma.io) + [Neon](https://neon.tech) (PostgreSQL)
+- [Auth.js v5](https://authjs.dev) for authentication
+- [Supabase Storage](https://supabase.com/storage) for media uploads
+
+## Project structure
+
+```
+whispr/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   └── register/
+│   ├── (dashboard)/
+│   │   └── dashboard/       # owner's private message inbox
+│   ├── [username]/          # public anonymous submission page
+│   └── api/
+├── components/
+├── lib/
+│   ├── auth.ts
+│   ├── db.ts                # Prisma client
+│   └── supabase.ts          # Supabase client
+├── prisma/
+│   └── schema.prisma
+└── types/
+```
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20+
+- A [Neon](https://neon.tech) PostgreSQL database
+- A [Supabase](https://supabase.com) project with a Storage bucket
+
+### Setup
+
+```bash
+npm install
+cp .env.example .env
+```
+
+Fill in `.env` with your own values:
+
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | Neon PostgreSQL connection string |
+| `AUTH_SECRET` | Secret used by Auth.js to sign sessions (`npx auth secret`) |
+| `NEXTAUTH_URL` | Base URL of the app (`http://localhost:3000` in dev) |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only, used for uploads) |
+
+Apply the database schema:
+
+```bash
+npx prisma migrate dev
+```
+
+Run the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Limits & rules
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Images up to 10MB, audio up to 20MB, video up to 50MB
+- Anonymous submissions are rate-limited per link to prevent spam
+- No sender identity is ever collected or stored
+- A receiver's email is never exposed on public routes
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploys to [Vercel](https://vercel.com). Set the same environment variables
+from `.env.example` in your Vercel project settings before deploying.

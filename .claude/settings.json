@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma *)",
+      "Bash(timeout 8 bash -c \"cat < /dev/null > /dev/tcp/ep-patient-brook-atgnsmxd-pooler.c-9.us-east-1.aws.neon.tech/5432\")",
+      "Bash(node dbtest.mjs)",
+      "Bash(rm dbtest.mjs)",
+      "Bash(git ls-remote *)",
+      "Bash(echo \"EXIT:$?\")"
+    ]
+  }
+}
