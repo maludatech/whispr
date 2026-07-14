@@ -6,7 +6,28 @@
       "Bash(node dbtest.mjs)",
       "Bash(rm dbtest.mjs)",
       "Bash(git ls-remote *)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(git commit -m ' *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(npx --yes shadcn@latest add input label card form sonner separator)",
+      "Bash(npm install *)",
+      "Bash(npx --yes auth secret)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\")",
+      "Bash(npm run *)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(netstat -ano)",
+      "Bash(ps -W)",
+      "Bash(taskkill //F //PID 35408)",
+      "Bash(npx --yes playwright install chromium --with-deps)",
+      "Bash(node \"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-USER-Desktop-projects-saas-whispr\\\\5f809445-a1df-4680-a7a1-17f701c08db8\\\\scratchpad\\\\screenshot.mjs\")",
+      "Bash(node screenshot.mjs)",
+      "Bash(rm screenshot.mjs)",
+      "Bash(node e2e.mjs)",
+      "Bash(rm e2e.mjs)",
+      "Bash(npm uninstall *)"
     ]
   }
 }
