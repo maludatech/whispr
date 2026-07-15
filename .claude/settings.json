@@ -30,7 +30,20 @@
       "Bash(npm uninstall *)",
       "Bash(node seed-and-shoot.mjs)",
       "Bash(sed -i 's#http://localhost:3001#http://localhost:3000#' seed-and-shoot.mjs)",
-      "Bash(rm -f seed-and-shoot.mjs)"
+      "Bash(rm -f seed-and-shoot.mjs)",
+      "Bash(node -e ' *)",
+      "Bash(node e2e-design.mjs)",
+      "Bash(node e2e-voice.mjs demo1784076083586)",
+      "Bash(npm ls *)",
+      "Bash(node e2e-video.mjs demo1784076083586)",
+      "Bash(node shot.mjs demo1784076083586)",
+      "Bash(rm shot.mjs)",
+      "Bash(node debug.mjs demo1784076083586)",
+      "Bash(rm debug.mjs)",
+      "Bash(node debug2.mjs demo1784076083586)",
+      "Bash(node debug3.mjs demo1784076083586)",
+      "Bash(grep -o 'IMAGE.\\\\{0,600\\\\}' \"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-USER-Desktop-projects-saas-whispr\\\\5f809445-a1df-4680-a7a1-17f701c08db8\\\\scratchpad\\\\dashboard-html.txt\")",
+      "Bash(sed -i 's/await page.waitForTimeout\\(1500\\);/await page.waitForSelector\\(\"img\", { timeout: 10000 }\\).catch\\(\\(\\) => {}\\); await page.waitForTimeout\\(500\\);/' debug3.mjs)"
     ]
   }
 }

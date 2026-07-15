@@ -128,3 +128,47 @@
     @apply font-sans;
   }
 }
+
+@keyframes whispr-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(10px, -14px) scale(1.04);
+  }
+}
+
+@keyframes whispr-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes whispr-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 oklch(0.68 0.22 340 / 45%);
+  }
+  100% {
+    box-shadow: 0 0 0 18px oklch(0.68 0.22 340 / 0%);
+  }
+}
+
+@keyframes whispr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes whispr-bar {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
