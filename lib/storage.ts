@@ -16,6 +16,10 @@ export async function uploadMedia(file: File, folder: string) {
   return path;
 }
 
+export async function deleteMedia(path: string) {
+  await supabaseAdmin.storage.from(BUCKET).remove([path]);
+}
+
 export async function getSignedUrl(path: string, expiresIn = 3600) {
   const { data, error } = await supabaseAdmin.storage
     .from(BUCKET)

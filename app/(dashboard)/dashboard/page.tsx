@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { Inbox } from "lucide-react";
+import Link from "next/link";
+import { Inbox, Settings } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSignedUrl } from "@/lib/storage";
@@ -39,15 +40,26 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground">Welcome back</p>
             <h1 className="text-2xl font-bold">@{username}</h1>
           </div>
-          <form action={logout}>
+          <div className="flex items-center gap-2">
             <Button
-              type="submit"
+              render={<Link href="/dashboard/settings" />}
+              nativeButton={false}
               variant="outline"
+              size="icon"
               className="rounded-full border-white/15"
             >
-              Log out
+              <Settings className="size-4" />
             </Button>
-          </form>
+            <form action={logout}>
+              <Button
+                type="submit"
+                variant="outline"
+                className="rounded-full border-white/15"
+              >
+                Log out
+              </Button>
+            </form>
+          </div>
         </div>
 
         {resolvedMessages.length === 0 ? (
@@ -72,6 +84,8 @@ export default async function DashboardPage() {
             {resolvedMessages.map((message) => (
               <MessageCard
                 key={message.id}
+                id={message.id}
+                username={username}
                 type={message.type}
                 content={message.content}
                 mediaUrl={message.mediaUrl}

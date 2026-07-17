@@ -1,4 +1,30 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { Loader2, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { ShareRow } from "@/components/dashboard/share-row";
+import { deleteMessage } from "@/app/(dashboard)/dashboard/actions";
+
 type MessageCardProps = {
+  id: string;
+  username: string;
   type: "text" | "image" | "audio" | "video";
   content: string | null;
   mediaUrl: string | null;
@@ -27,39 +53,115 @@ const LABELS: Record<MessageCardProps["type"], string> = {
   video: "Video",
 };
 
-export function MessageCard({ type, content, mediaUrl, createdAt }: MessageCardProps) {
+function MediaBody({
+  type,
+  content,
+  mediaUrl,
+  full = false,
+}: Pick<MessageCardProps, "type" | "content" | "mediaUrl"> & { full?: boolean }) {
+  if (type === "text") {
+    return <p className={`text-balance ${full ? "text-base" : "text-sm"} text-foreground/90`}>{content}</p>;
+  }
+  if (type === "image" && mediaUrl) {
+    return (
+      <img
+        src={mediaUrl}
+        alt="Anonymous submission"
+        className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
+      />
+    );
+  }
+  if (type === "audio" && mediaUrl) {
+    return <audio controls src={mediaUrl} className="w-full" />;
+  }
+  if (type === "video" && mediaUrl) {
+    return (
+      <video
+        controls
+        src={mediaUrl}
+        className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
+      />
+    );
+  }
+  return null;
+}
+
+export function MessageCard({ id, username, type, content, mediaUrl, createdAt }: MessageCardProps) {
+  const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      await deleteMessage(id);
+      setOpen(false);
+    });
+  };
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-card/75 p-5 backdrop-blur-xl">
-      <div className="mb-3 flex items-center justify-between">
-        <span
-          className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}
-        >
-          {LABELS[type]}
-        </span>
-        <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
-      </div>
-
-      {type === "text" && (
-        <p className="text-sm text-balance text-foreground/90">{content}</p>
-      )}
-
-      {type === "image" && mediaUrl && (
-        <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
-          <img
-            src={mediaUrl}
-            alt="Anonymous submission"
-            className="max-h-80 w-full rounded-2xl object-cover"
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <button
+            type="button"
+            className="w-full rounded-3xl border border-white/10 bg-card/75 p-5 text-left backdrop-blur-xl transition-colors hover:border-white/20"
           />
-        </a>
-      )}
+        }
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
+            {LABELS[type]}
+          </span>
+          <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
+        </div>
+        <MediaBody type={type} content={content} mediaUrl={mediaUrl} />
+      </DialogTrigger>
 
-      {type === "audio" && mediaUrl && (
-        <audio controls src={mediaUrl} className="w-full" />
-      )}
+      <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
+        <div className="flex flex-col gap-4 pt-2">
+          <div className="flex items-center justify-between">
+            <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
+              {LABELS[type]}
+            </span>
+            <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
+          </div>
 
-      {type === "video" && mediaUrl && (
-        <video controls src={mediaUrl} className="max-h-80 w-full rounded-2xl" />
-      )}
-    </div>
+          <MediaBody type={type} content={content} mediaUrl={mediaUrl} full />
+
+          <ShareRow username={username} />
+
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="outline"
+                  disabled={pending}
+                  className="w-full gap-2 rounded-full border-destructive/30 text-destructive hover:bg-destructive/10"
+                />
+              }
+            >
+              {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Delete whisper
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete this whisper?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This can&apos;t be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-white hover:bg-destructive/90"
+                  onClick={handleDelete}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

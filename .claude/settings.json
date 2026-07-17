@@ -43,7 +43,14 @@
       "Bash(node debug2.mjs demo1784076083586)",
       "Bash(node debug3.mjs demo1784076083586)",
       "Bash(grep -o 'IMAGE.\\\\{0,600\\\\}' \"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-USER-Desktop-projects-saas-whispr\\\\5f809445-a1df-4680-a7a1-17f701c08db8\\\\scratchpad\\\\dashboard-html.txt\")",
-      "Bash(sed -i 's/await page.waitForTimeout\\(1500\\);/await page.waitForSelector\\(\"img\", { timeout: 10000 }\\).catch\\(\\(\\) => {}\\); await page.waitForTimeout\\(500\\);/' debug3.mjs)"
+      "Bash(sed -i 's/await page.waitForTimeout\\(1500\\);/await page.waitForSelector\\(\"img\", { timeout: 10000 }\\).catch\\(\\(\\) => {}\\); await page.waitForTimeout\\(500\\);/' debug3.mjs)",
+      "Bash(npx --yes shadcn@latest add dialog alert-dialog)",
+      "Bash(node e2e-full.mjs)",
+      "Bash(node e2e-settings.mjs demo1784251912163 demo1784251912163@example.com)",
+      "Bash(node e2e-reset.mjs demo1784251912163@example.com)",
+      "Bash(node e2e-reset2.mjs)",
+      "Bash(node e2e-reset3.mjs)",
+      "Bash(node e2e-reset4.mjs)"
     ]
   }
 }
