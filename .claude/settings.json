@@ -50,7 +50,15 @@
       "Bash(node e2e-reset.mjs demo1784251912163@example.com)",
       "Bash(node e2e-reset2.mjs)",
       "Bash(node e2e-reset3.mjs)",
-      "Bash(node e2e-reset4.mjs)"
+      "Bash(node e2e-reset4.mjs)",
+      "Bash(node final-check.mjs)",
+      "Bash(node check-text.mjs)",
+      "Bash(rm check-text.mjs)",
+      "Bash(node check-text2.mjs check1784254698953)",
+      "Bash(rm check-text2.mjs)",
+      "Bash(node check-text3.mjs check1784254698953)",
+      "Bash(rm check-text3.mjs)",
+      "Bash(rm -f final-check.mjs)"
     ]
   }
 }

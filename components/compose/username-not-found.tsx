@@ -9,7 +9,8 @@ export function UsernameNotFound({ username }: { username: string }) {
       </span>
       <div>
         <h1 className="text-xl font-bold text-balance">
-          @{username} isn&apos;t a whispr
+          @{username}
+          {" "}isn&apos;t a whispr
         </h1>
         <p className="mt-2 max-w-65 text-sm text-balance text-muted-foreground">
           This link doesn&apos;t exist — double-check the username, or maybe

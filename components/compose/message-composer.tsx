@@ -104,7 +104,8 @@ function ComposerBody({
         <div>
           <h2 className="text-xl font-bold">Sent 👀</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            @{username} has no idea it was you.
+            @{username}
+            {" "}has no idea it was you.
           </p>
         </div>
         <Button
