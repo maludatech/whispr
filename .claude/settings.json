@@ -76,7 +76,9 @@
       "Bash(node e2e-topic2.mjs)",
       "Bash(sed -i 's/localhost:3001/localhost:3000/' e2e-topic2.mjs)",
       "Bash(node e2e-topic3.mjs)",
-      "Bash(rm -f e2e-topic.mjs e2e-topic2.mjs e2e-topic3.mjs)"
+      "Bash(rm -f e2e-topic.mjs e2e-topic2.mjs e2e-topic3.mjs)",
+      "Bash(node check-home.mjs)",
+      "Bash(rm -f check-home.mjs)"
     ]
   }
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MessageSquareText, Image as ImageIcon, Mic, Video } from "lucide-react";
+import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { BackgroundBlobs } from "@/components/decor/background-blobs";
 
@@ -10,7 +11,9 @@ const formats = [
   { icon: Video, label: "Video" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <main className="relative flex min-h-screen flex-1 flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
       <BackgroundBlobs />
@@ -41,23 +44,35 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-2 flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
-          <Button
-            render={<Link href="/register" />}
-            nativeButton={false}
-            className="h-13 flex-1 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90"
-          >
-            Get your link
-          </Button>
-          <Button
-            render={<Link href="/login" />}
-            nativeButton={false}
-            variant="outline"
-            className="h-13 flex-1 rounded-full border-white/20 bg-white/5 px-8 text-base font-semibold backdrop-blur-sm hover:bg-white/10"
-          >
-            Log in
-          </Button>
-        </div>
+        {session ? (
+          <div className="mt-2 flex w-full max-w-xs flex-col gap-3">
+            <Button
+              render={<Link href="/dashboard" />}
+              nativeButton={false}
+              className="h-13 w-full rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90"
+            >
+              Go to dashboard
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-2 flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+            <Button
+              render={<Link href="/register" />}
+              nativeButton={false}
+              className="h-13 flex-1 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90"
+            >
+              Get your link
+            </Button>
+            <Button
+              render={<Link href="/login" />}
+              nativeButton={false}
+              variant="outline"
+              className="h-13 flex-1 rounded-full border-white/20 bg-white/5 px-8 text-base font-semibold backdrop-blur-sm hover:bg-white/10"
+            >
+              Log in
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );
