@@ -18,6 +18,12 @@ export default function DashboardLoading() {
         <Shimmer className="h-9 w-20 rounded-full" />
       </div>
 
+      <div className="flex flex-col gap-3 rounded-3xl border border-white/8 bg-card/70 p-6">
+        <Shimmer className="h-5 w-40 rounded-full" />
+        <Shimmer className="h-3.5 w-2/3" />
+        <Shimmer className="h-11 w-full rounded-xl" />
+      </div>
+
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 rounded-3xl border border-white/8 bg-card/70 p-5">
           <Shimmer className="h-4.5 w-15 rounded-full" />

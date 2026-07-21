@@ -58,7 +58,25 @@
       "Bash(rm check-text2.mjs)",
       "Bash(node check-text3.mjs check1784254698953)",
       "Bash(rm check-text3.mjs)",
-      "Bash(rm -f final-check.mjs)"
+      "Bash(rm -f final-check.mjs)",
+      "Bash(gh repo *)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://api.github.com/repos/maludatech/anonymous/git/trees/main?recursive=1\")",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"https://api.github.com/repos/maludatech/anonymous/git/trees/main?recursive=1\" -o \"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-USER-Desktop-projects-saas-whispr\\\\5f809445-a1df-4680-a7a1-17f701c08db8\\\\scratchpad\\\\tree.json\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:ngl.link)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "WebFetch(domain:console.groq.com)",
+      "Bash(npm view *)",
+      "Bash(node e2e-topic.mjs)",
+      "Bash(sed -i 's/page.waitForSelector\\(\"text=Sent\", { timeout: 15000 }\\);/page.waitForSelector\\(\\\\x27h2:has-text\\(\"Sent\"\\)\\\\x27, { timeout: 15000 }\\);/' e2e-topic.mjs)",
+      "Bash(sed -i \"s/page.waitForSelector\\(\\\\\"text=\\\\\" + messages\\\\[0\\\\].slice\\(0, 20\\), { timeout: 10000 }\\);/page.waitForSelector\\('text=' + messages[0].slice\\(0, 20\\), { timeout: 15000 }\\);/\" e2e-topic.mjs)",
+      "Bash(node e2e-topic2.mjs)",
+      "Bash(sed -i 's/localhost:3001/localhost:3000/' e2e-topic2.mjs)",
+      "Bash(node e2e-topic3.mjs)",
+      "Bash(rm -f e2e-topic.mjs e2e-topic2.mjs e2e-topic3.mjs)"
     ]
   }
 }

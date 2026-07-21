@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { uploadMedia } from "@/lib/storage";
+import { classifyTopic } from "@/lib/groq";
 import {
   TextMessageSchema,
   MEDIA_LIMITS,
@@ -47,8 +48,10 @@ export async function sendTextMessage(
     return { status: "error", message: "This link doesn't exist anymore" };
   }
 
+  const topic = await classifyTopic(content);
+
   await prisma.message.create({
-    data: { receiverId: receiver.id, type: "text", content },
+    data: { receiverId: receiver.id, type: "text", content, topic },
   });
 
   return { status: "success" };
@@ -94,7 +97,7 @@ export async function sendMediaMessage(
   }
 
   await prisma.message.create({
-    data: { receiverId: receiver.id, type, mediaUrl: path },
+    data: { receiverId: receiver.id, type, mediaUrl: path, topic: "Media" },
   });
 
   return { status: "success" };

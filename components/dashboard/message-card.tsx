@@ -28,6 +28,7 @@ type MessageCardProps = {
   type: "text" | "image" | "audio" | "video";
   content: string | null;
   mediaUrl: string | null;
+  topic: string | null;
   createdAt: Date;
 };
 
@@ -86,7 +87,7 @@ function MediaBody({
   return null;
 }
 
-export function MessageCard({ id, username, type, content, mediaUrl, createdAt }: MessageCardProps) {
+export function MessageCard({ id, username, type, content, mediaUrl, topic, createdAt }: MessageCardProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -108,9 +109,16 @@ export function MessageCard({ id, username, type, content, mediaUrl, createdAt }
         }
       >
         <div className="mb-3 flex items-center justify-between">
-          <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
-            {LABELS[type]}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
+              {LABELS[type]}
+            </span>
+            {topic && (
+              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
+                {topic}
+              </span>
+            )}
+          </div>
           <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
         </div>
         <MediaBody type={type} content={content} mediaUrl={mediaUrl} />
@@ -119,9 +127,16 @@ export function MessageCard({ id, username, type, content, mediaUrl, createdAt }
       <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
         <div className="flex flex-col gap-4 pt-2">
           <div className="flex items-center justify-between">
-            <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
-              {LABELS[type]}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
+                {LABELS[type]}
+              </span>
+              {topic && (
+                <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
+                  {topic}
+                </span>
+              )}
+            </div>
             <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
           </div>
 

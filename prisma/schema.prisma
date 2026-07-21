@@ -42,6 +42,7 @@ model Message {
   type       MessageType
   content    String?
   mediaUrl   String?
+  topic      String?
   createdAt  DateTime    @default(now())
 
   @@index([receiverId])

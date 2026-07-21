@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSignedUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
-import { CopyLinkButton } from "@/components/dashboard/copy-link-button";
+import { ShareLinkCard } from "@/components/dashboard/share-link-card";
 import { MessageCard } from "@/components/dashboard/message-card";
 import { BackgroundBlobs } from "@/components/decor/background-blobs";
 import { logout } from "./actions";
@@ -62,6 +62,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        <ShareLinkCard username={username} />
+
         {resolvedMessages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-4 rounded-3xl border border-white/12 bg-card/60 px-8 py-16 text-center backdrop-blur-xl">
             <span className="flex size-16 items-center justify-center rounded-full bg-linear-to-br from-violet-500 via-fuchsia-500 to-amber-400 shadow-lg shadow-fuchsia-500/40">
@@ -74,10 +76,6 @@ export default async function DashboardPage() {
                 texts, pics, voice notes & videos.
               </p>
             </div>
-            <CopyLinkButton username={username} />
-            <span className="font-mono text-xs text-muted-foreground">
-              whispr.app/{username}
-            </span>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -89,6 +87,7 @@ export default async function DashboardPage() {
                 type={message.type}
                 content={message.content}
                 mediaUrl={message.mediaUrl}
+                topic={message.topic}
                 createdAt={message.createdAt}
               />
             ))}
