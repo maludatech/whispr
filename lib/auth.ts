@@ -3,8 +3,13 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 
+const SEVEN_DAYS = 7 * 24 * 60 * 60;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: SEVEN_DAYS,
+  },
   pages: {
     signIn: "/login",
   },
