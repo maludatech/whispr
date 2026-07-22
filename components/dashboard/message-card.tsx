@@ -22,12 +22,19 @@ import { Button } from "@/components/ui/button";
 import { ShareRow } from "@/components/dashboard/share-row";
 import { deleteMessage } from "@/app/(dashboard)/dashboard/actions";
 
+type AttachmentType = "image" | "audio" | "video";
+
+type Attachment = {
+  id: string;
+  type: AttachmentType;
+  mediaUrl: string;
+};
+
 type MessageCardProps = {
   id: string;
   username: string;
-  type: "text" | "image" | "audio" | "video";
   content: string | null;
-  mediaUrl: string | null;
+  attachments: Attachment[];
   topic: string | null;
   createdAt: Date;
 };
@@ -40,54 +47,81 @@ const formatDate = (date: Date) =>
     minute: "2-digit",
   }).format(date);
 
-const LABEL_STYLES: Record<MessageCardProps["type"], string> = {
+const LABEL_STYLES: Record<AttachmentType | "text", string> = {
   text: "text-fuchsia-300 bg-fuchsia-500/15",
   image: "text-violet-300 bg-violet-500/15",
   audio: "text-amber-300 bg-amber-500/15",
   video: "text-rose-300 bg-rose-500/15",
 };
 
-const LABELS: Record<MessageCardProps["type"], string> = {
+const LABELS: Record<AttachmentType | "text", string> = {
   text: "Text",
   image: "Image",
   audio: "Voice",
   video: "Video",
 };
 
-function MediaBody({
-  type,
-  content,
-  mediaUrl,
-  full = false,
-}: Pick<MessageCardProps, "type" | "content" | "mediaUrl"> & { full?: boolean }) {
-  if (type === "text") {
-    return <p className={`text-balance ${full ? "text-base" : "text-sm"} text-foreground/90`}>{content}</p>;
+function TypeBadges({ content, attachments }: Pick<MessageCardProps, "content" | "attachments">) {
+  const types: (AttachmentType | "text")[] = [];
+  if (content) types.push("text");
+  for (const attachment of attachments) {
+    if (!types.includes(attachment.type)) types.push(attachment.type);
   }
-  if (type === "image" && mediaUrl) {
-    return (
-      <img
-        src={mediaUrl}
-        alt="Anonymous submission"
-        className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
-      />
-    );
-  }
-  if (type === "audio" && mediaUrl) {
-    return <audio controls src={mediaUrl} className="w-full" />;
-  }
-  if (type === "video" && mediaUrl) {
-    return (
-      <video
-        controls
-        src={mediaUrl}
-        className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
-      />
-    );
-  }
-  return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {types.map((type) => (
+        <span
+          key={type}
+          className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}
+        >
+          {LABELS[type]}
+        </span>
+      ))}
+    </div>
+  );
 }
 
-export function MessageCard({ id, username, type, content, mediaUrl, topic, createdAt }: MessageCardProps) {
+function MessageBody({
+  content,
+  attachments,
+  full = false,
+}: Pick<MessageCardProps, "content" | "attachments"> & { full?: boolean }) {
+  return (
+    <div className="flex flex-col gap-3">
+      {content && (
+        <p className={`text-balance ${full ? "text-base" : "text-sm"} text-foreground/90`}>
+          {content}
+        </p>
+      )}
+      {attachments.map((attachment) => {
+        if (attachment.type === "image") {
+          return (
+            <img
+              key={attachment.id}
+              src={attachment.mediaUrl}
+              alt="Anonymous submission"
+              className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
+            />
+          );
+        }
+        if (attachment.type === "audio") {
+          return <audio key={attachment.id} controls src={attachment.mediaUrl} className="w-full" />;
+        }
+        return (
+          <video
+            key={attachment.id}
+            controls
+            src={attachment.mediaUrl}
+            className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+export function MessageCard({ id, username, content, attachments, topic, createdAt }: MessageCardProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -110,9 +144,7 @@ export function MessageCard({ id, username, type, content, mediaUrl, topic, crea
       >
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
-              {LABELS[type]}
-            </span>
+            <TypeBadges content={content} attachments={attachments} />
             {topic && (
               <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
                 {topic}
@@ -121,16 +153,14 @@ export function MessageCard({ id, username, type, content, mediaUrl, topic, crea
           </div>
           <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
         </div>
-        <MediaBody type={type} content={content} mediaUrl={mediaUrl} />
+        <MessageBody content={content} attachments={attachments} />
       </DialogTrigger>
 
       <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
         <div className="flex flex-col gap-4 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className={`rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide uppercase ${LABEL_STYLES[type]}`}>
-                {LABELS[type]}
-              </span>
+              <TypeBadges content={content} attachments={attachments} />
               {topic && (
                 <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
                   {topic}
@@ -140,7 +170,7 @@ export function MessageCard({ id, username, type, content, mediaUrl, topic, crea
             <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
           </div>
 
-          <MediaBody type={type} content={content} mediaUrl={mediaUrl} full />
+          <MessageBody content={content} attachments={attachments} full />
 
           <ShareRow username={username} />
 

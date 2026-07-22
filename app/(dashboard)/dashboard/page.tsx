@@ -18,15 +18,18 @@ export default async function DashboardPage() {
   const messages = await prisma.message.findMany({
     where: { receiver: { username } },
     orderBy: { createdAt: "desc" },
+    include: { attachments: true },
   });
 
   const resolvedMessages = await Promise.all(
     messages.map(async (message) => ({
       ...message,
-      mediaUrl:
-        message.type !== "text" && message.mediaUrl
-          ? await getSignedUrl(message.mediaUrl)
-          : message.mediaUrl,
+      attachments: await Promise.all(
+        message.attachments.map(async (attachment) => ({
+          ...attachment,
+          mediaUrl: (await getSignedUrl(attachment.mediaUrl)) ?? attachment.mediaUrl,
+        })),
+      ),
     })),
   );
 
@@ -84,9 +87,8 @@ export default async function DashboardPage() {
                 key={message.id}
                 id={message.id}
                 username={username}
-                type={message.type}
                 content={message.content}
-                mediaUrl={message.mediaUrl}
+                attachments={message.attachments}
                 topic={message.topic}
                 createdAt={message.createdAt}
               />

@@ -28,22 +28,31 @@ model PasswordResetToken {
   @@index([userId])
 }
 
-enum MessageType {
-  text
+enum AttachmentType {
   image
   audio
   video
 }
 
 model Message {
-  id         String      @id @default(uuid())
-  receiverId String
-  receiver   User        @relation(fields: [receiverId], references: [id], onDelete: Cascade)
-  type       MessageType
-  content    String?
-  mediaUrl   String?
-  topic      String?
-  createdAt  DateTime    @default(now())
+  id          String       @id @default(uuid())
+  receiverId  String
+  receiver    User         @relation(fields: [receiverId], references: [id], onDelete: Cascade)
+  content     String?
+  topic       String?
+  createdAt   DateTime     @default(now())
+  attachments Attachment[]
 
   @@index([receiverId])
+}
+
+model Attachment {
+  id        String         @id @default(uuid())
+  messageId String
+  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  type      AttachmentType
+  mediaUrl  String
+  createdAt DateTime       @default(now())
+
+  @@index([messageId])
 }

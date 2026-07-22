@@ -78,7 +78,15 @@
       "Bash(node e2e-topic3.mjs)",
       "Bash(rm -f e2e-topic.mjs e2e-topic2.mjs e2e-topic3.mjs)",
       "Bash(node check-home.mjs)",
-      "Bash(rm -f check-home.mjs)"
+      "Bash(rm -f check-home.mjs)",
+      "Bash(node check-session.mjs)",
+      "Bash(rm -f check-session.mjs)",
+      "Bash(taskkill //F //PID 20268)",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(npx playwright *)",
+      "Bash(node check-stage1.mjs)",
+      "Bash(rm -f check-stage1.mjs)"
     ]
   }
 }

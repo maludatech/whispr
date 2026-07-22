@@ -15,16 +15,16 @@ export async function deleteMessage(messageId: string) {
 
   const message = await prisma.message.findUnique({
     where: { id: messageId },
-    select: { receiverId: true, mediaUrl: true, type: true },
+    select: { receiverId: true, attachments: { select: { mediaUrl: true } } },
   });
 
   if (!message || message.receiverId !== session.user.id) {
     return { error: "Message not found" };
   }
 
-  if (message.type !== "text" && message.mediaUrl) {
-    await deleteMedia(message.mediaUrl);
-  }
+  await Promise.all(
+    message.attachments.map((attachment) => deleteMedia(attachment.mediaUrl)),
+  );
 
   await prisma.message.delete({ where: { id: messageId } });
   revalidatePath("/dashboard");

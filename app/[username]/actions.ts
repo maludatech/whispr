@@ -51,7 +51,7 @@ export async function sendTextMessage(
   const topic = await classifyTopic(content);
 
   await prisma.message.create({
-    data: { receiverId: receiver.id, type: "text", content, topic },
+    data: { receiverId: receiver.id, content, topic },
   });
 
   return { status: "success" };
@@ -97,7 +97,11 @@ export async function sendMediaMessage(
   }
 
   await prisma.message.create({
-    data: { receiverId: receiver.id, type, mediaUrl: path, topic: "Media" },
+    data: {
+      receiverId: receiver.id,
+      topic: "Media",
+      attachments: { create: [{ type, mediaUrl: path }] },
+    },
   });
 
   return { status: "success" };
