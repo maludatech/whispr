@@ -98,6 +98,8 @@ function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
     ) : (
       <video
         controls
+        playsInline
+        preload="auto"
         src={item.mediaUrl}
         className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
       />
@@ -117,7 +119,7 @@ function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
             {item.type === "image" ? (
               <img src={item.mediaUrl} alt="Anonymous submission" className="size-full object-cover" />
             ) : (
-              <video src={item.mediaUrl} muted className="size-full object-cover" />
+              <video src={item.mediaUrl} muted playsInline preload="auto" className="size-full object-cover" />
             )}
             {item.type === "video" && !showOverflow && (
               <span className="absolute right-1.5 bottom-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
@@ -171,32 +173,17 @@ export function MessageCard({ id, username, content, attachments, topic, created
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <button
-            type="button"
-            className="w-full rounded-3xl border border-white/10 bg-card/75 p-5 text-left backdrop-blur-xl transition-colors hover:border-white/20"
-          />
-        }
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <TypeBadges content={content} attachments={attachments} />
-            {topic && (
-              <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
-                {topic}
-              </span>
-            )}
-          </div>
-          <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
-        </div>
-        <MessageBody content={content} attachments={attachments} />
-      </DialogTrigger>
-
-      <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
-        <div className="flex flex-col gap-4 pt-2">
-          <div className="flex items-center justify-between">
+    <div className="relative">
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger
+          render={
+            <button
+              type="button"
+              className="w-full rounded-3xl border border-white/10 bg-card/75 p-5 pr-13 text-left backdrop-blur-xl transition-colors hover:border-white/20"
+            />
+          }
+        >
+          <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <TypeBadges content={content} attachments={attachments} />
               {topic && (
@@ -207,44 +194,91 @@ export function MessageCard({ id, username, content, attachments, topic, created
             </div>
             <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
           </div>
+          <MessageBody content={content} attachments={attachments} />
+        </DialogTrigger>
 
-          <MessageBody content={content} attachments={attachments} full />
+        <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
+          <div className="flex flex-col gap-4 pt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <TypeBadges content={content} attachments={attachments} />
+                {topic && (
+                  <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
+                    {topic}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
+            </div>
 
-          <ShareRow username={username} />
+            <MessageBody content={content} attachments={attachments} full />
 
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  variant="outline"
-                  disabled={pending}
-                  className="w-full gap-2 rounded-full border-destructive/30 text-destructive hover:bg-destructive/10"
-                />
-              }
+            <ShareRow username={username} />
+
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    disabled={pending}
+                    className="w-full gap-2 rounded-full border-destructive/30 text-destructive hover:bg-destructive/10"
+                  />
+                }
+              >
+                {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                Delete whisper
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this whisper?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This can&apos;t be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button
+              type="button"
+              disabled={pending}
+              aria-label="Delete whisper"
+              className="absolute top-4.5 right-4.5 flex size-8 items-center justify-center rounded-full bg-black/30 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-destructive/20 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+            />
+          }
+        >
+          {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this whisper?</AlertDialogTitle>
+            <AlertDialogDescription>This can&apos;t be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={handleDelete}
             >
-              {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
-              Delete whisper
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete this whisper?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This can&apos;t be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-white hover:bg-destructive/90"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </DialogContent>
-    </Dialog>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }

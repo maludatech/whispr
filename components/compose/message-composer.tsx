@@ -166,6 +166,11 @@ function ComposerBody({
             onRemove={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
             onRemoveAudio={() => setAudioFile(null)}
           />
+          {attachments.length > 0 && (
+            <span className="-mt-2 self-end text-xs text-muted-foreground">
+              {attachments.length}/{MAX_ATTACHMENTS} attached
+            </span>
+          )}
 
           <div className="space-y-1.5">
             <textarea
@@ -196,6 +201,7 @@ function ComposerBody({
           type="button"
           variant="outline"
           size="icon"
+          disabled={attachments.length >= MAX_ATTACHMENTS}
           onClick={() => {
             setLocalError(null);
             fileInputRef.current?.click();

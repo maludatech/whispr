@@ -19,7 +19,7 @@ function Thumb({ attachment, onRemove }: { attachment: PickedAttachment; onRemov
         <img ref={imgRef} alt="Attached" className="size-full object-cover" />
       ) : (
         <>
-          <video ref={videoRef} muted className="size-full object-cover" />
+          <video ref={videoRef} muted playsInline preload="auto" className="size-full object-cover" />
           <VideoIcon className="absolute right-1 bottom-1 size-3.5 text-white drop-shadow" />
         </>
       )}

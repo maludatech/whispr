@@ -13,6 +13,7 @@ export function useObjectUrlRef<T extends HTMLImageElement | HTMLVideoElement | 
 
     const url = URL.createObjectURL(file);
     el.src = url;
+    if ("load" in el) el.load();
 
     return () => {
       URL.revokeObjectURL(url);

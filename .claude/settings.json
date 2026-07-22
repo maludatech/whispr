@@ -97,7 +97,16 @@
       "Bash(taskkill //F //PID 26004)",
       "Bash(nohup npm run dev)",
       "Bash(node check-stage4.mjs)",
-      "Bash(rm -f check-stage4.mjs debug-composer.png)"
+      "Bash(rm -f check-stage4.mjs debug-composer.png)",
+      "Bash(where ffmpeg *)",
+      "Bash(node make-test-video.mjs)",
+      "Bash(node check-video-repro.mjs)",
+      "Bash(taskkill //F //PID 8700)",
+      "Bash(tail -60 /tmp/dev.log)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/dashboard)",
+      "Bash(node check-stage5.mjs)",
+      "Bash(node check-dashvideo.mjs)",
+      "Bash(rm -f check-stage5.mjs check-dashvideo.mjs check-video-repro.mjs check-video-thumb.png make-test-video.mjs test-video.webm.b64)"
     ]
   }
 }
