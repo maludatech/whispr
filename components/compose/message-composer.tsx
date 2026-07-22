@@ -212,7 +212,7 @@ function ComposerBody({
         <Button
           type="submit"
           disabled={!canSend || isPending || micOpen}
-          className="h-12.5 flex-1 gap-2 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 transition-transform hover:scale-[1.01] hover:opacity-90 disabled:from-white/10 disabled:via-white/10 disabled:to-white/10 disabled:text-muted-foreground disabled:shadow-none disabled:hover:scale-100"
+          className="h-12.5 flex-1 gap-2 rounded-full border border-white/10 bg-white/5 text-base font-semibold text-muted-foreground shadow-none transition-transform enabled:border-transparent enabled:bg-linear-to-r enabled:from-violet-500 enabled:via-fuchsia-500 enabled:to-amber-400 enabled:text-white enabled:shadow-lg enabled:shadow-fuchsia-500/30 enabled:hover:scale-[1.01] enabled:hover:opacity-90"
         >
           {isPending ? (
             <>

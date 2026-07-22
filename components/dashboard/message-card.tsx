@@ -82,11 +82,68 @@ function TypeBadges({ content, attachments }: Pick<MessageCardProps, "content" |
   );
 }
 
+const MAX_GRID_TILES = 4;
+
+function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
+  if (items.length === 0) return null;
+
+  if (items.length === 1) {
+    const item = items[0];
+    return item.type === "image" ? (
+      <img
+        src={item.mediaUrl}
+        alt="Anonymous submission"
+        className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
+      />
+    ) : (
+      <video
+        controls
+        src={item.mediaUrl}
+        className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
+      />
+    );
+  }
+
+  const tiles = items.slice(0, MAX_GRID_TILES);
+  const overflowCount = items.length - MAX_GRID_TILES;
+
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      {tiles.map((item, index) => {
+        const isLastTile = index === tiles.length - 1;
+        const showOverflow = isLastTile && overflowCount > 0;
+        return (
+          <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-black/40">
+            {item.type === "image" ? (
+              <img src={item.mediaUrl} alt="Anonymous submission" className="size-full object-cover" />
+            ) : (
+              <video src={item.mediaUrl} muted className="size-full object-cover" />
+            )}
+            {item.type === "video" && !showOverflow && (
+              <span className="absolute right-1.5 bottom-1.5 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                Video
+              </span>
+            )}
+            {showOverflow && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/60 text-lg font-bold text-white">
+                +{overflowCount}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function MessageBody({
   content,
   attachments,
   full = false,
 }: Pick<MessageCardProps, "content" | "attachments"> & { full?: boolean }) {
+  const visual = attachments.filter((a) => a.type === "image" || a.type === "video");
+  const audio = attachments.filter((a) => a.type === "audio");
+
   return (
     <div className="flex flex-col gap-3">
       {content && (
@@ -94,29 +151,10 @@ function MessageBody({
           {content}
         </p>
       )}
-      {attachments.map((attachment) => {
-        if (attachment.type === "image") {
-          return (
-            <img
-              key={attachment.id}
-              src={attachment.mediaUrl}
-              alt="Anonymous submission"
-              className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
-            />
-          );
-        }
-        if (attachment.type === "audio") {
-          return <audio key={attachment.id} controls src={attachment.mediaUrl} className="w-full" />;
-        }
-        return (
-          <video
-            key={attachment.id}
-            controls
-            src={attachment.mediaUrl}
-            className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
-          />
-        );
-      })}
+      <VisualGrid items={visual} full={full} />
+      {audio.map((attachment) => (
+        <audio key={attachment.id} controls src={attachment.mediaUrl} className="w-full" />
+      ))}
     </div>
   );
 }

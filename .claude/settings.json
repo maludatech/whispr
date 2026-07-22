@@ -89,7 +89,11 @@
       "Bash(rm -f check-stage1.mjs)",
       "Bash(taskkill //F //PID 13668)",
       "Bash(node check-stage2.mjs)",
-      "Bash(rm -f check-stage2.mjs)"
+      "Bash(rm -f check-stage2.mjs)",
+      "Bash(taskkill //F //PID 21036)",
+      "Bash(node check-stage3.mjs)",
+      "Bash(taskkill //F //PID 19812)",
+      "Bash(rm -f check-stage3.mjs check-disabled-button.png check-enabled-button.png check-dashboard-grid.png)"
     ]
   }
 }
