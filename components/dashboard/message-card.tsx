@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2, Trash2, Maximize2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -179,7 +179,7 @@ export function MessageCard({ id, username, content, attachments, topic, created
           render={
             <button
               type="button"
-              className="w-full rounded-3xl border border-white/10 bg-card/75 p-5 pr-13 text-left backdrop-blur-xl transition-colors hover:border-white/20"
+              className="w-full cursor-pointer rounded-3xl border border-white/10 bg-card/75 p-5 pr-13 text-left backdrop-blur-xl transition-all hover:border-fuchsia-400/30 hover:bg-card/90 hover:shadow-lg hover:shadow-fuchsia-500/10 active:scale-[0.99]"
             />
           }
         >
@@ -195,6 +195,10 @@ export function MessageCard({ id, username, content, attachments, topic, created
             <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
           </div>
           <MessageBody content={content} attachments={attachments} />
+          <div className="mt-3 flex items-center gap-1.5 text-[10.5px] font-medium text-muted-foreground/70">
+            <Maximize2 className="size-3" />
+            Tap to view
+          </div>
         </DialogTrigger>
 
         <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>

@@ -106,7 +106,17 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/dashboard)",
       "Bash(node check-stage5.mjs)",
       "Bash(node check-dashvideo.mjs)",
-      "Bash(rm -f check-stage5.mjs check-dashvideo.mjs check-video-repro.mjs check-video-thumb.png make-test-video.mjs test-video.webm.b64)"
+      "Bash(rm -f check-stage5.mjs check-dashvideo.mjs check-video-repro.mjs check-video-thumb.png make-test-video.mjs test-video.webm.b64)",
+      "Bash(taskkill //F //PID 26628)",
+      "Bash(node check-stage6.mjs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/register)",
+      "Bash(cd \"c:\\\\Users\\\\USER\\\\Desktop\\\\projects\\\\saas\\\\whispr\" && tail -40 /tmp/dev.log)",
+      "Bash(curl -s -o /dev/null -w \"login: %{http_code}\\\\n\" http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(taskkill //F //PID 25744)",
+      "Bash(rm -rf .next)",
+      "Bash(curl -s -o /dev/null -w \"register: %{http_code}\\\\n\" http://localhost:3000/register)",
+      "Bash(rm -f check-stage6.mjs check-card-affordance.png check-overlay-dark.png)"
     ]
   }
 }
