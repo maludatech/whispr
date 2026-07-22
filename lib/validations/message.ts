@@ -8,6 +8,9 @@ export const MEDIA_LIMITS = {
 
 export type MediaType = keyof typeof MEDIA_LIMITS;
 
+export const MAX_ATTACHMENTS = 10;
+export const MAX_CONTENT_LENGTH = 500;
+
 export function validateMediaFile(type: MediaType, file: File) {
   const limit = MEDIA_LIMITS[type];
   if (!file.type.startsWith(limit.mimePrefix)) {

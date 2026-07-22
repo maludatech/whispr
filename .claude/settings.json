@@ -86,7 +86,10 @@
       "Read(//tmp/**)",
       "Bash(npx playwright *)",
       "Bash(node check-stage1.mjs)",
-      "Bash(rm -f check-stage1.mjs)"
+      "Bash(rm -f check-stage1.mjs)",
+      "Bash(taskkill //F //PID 13668)",
+      "Bash(node check-stage2.mjs)",
+      "Bash(rm -f check-stage2.mjs)"
     ]
   }
 }

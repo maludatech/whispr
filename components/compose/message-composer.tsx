@@ -1,34 +1,20 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import {
-  MessageSquareText,
-  Image as ImageIcon,
-  Mic,
-  Video,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
+import { Paperclip, Mic, Send, Sparkles, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MediaDropzone } from "@/components/compose/media-dropzone";
+import { AttachmentStrip, type PickedAttachment } from "@/components/compose/attachment-strip";
 import { VoiceRecorder } from "@/components/compose/voice-recorder";
-import {
-  sendTextMessage,
-  sendMediaMessage,
-  type SendMessageState,
-} from "@/app/[username]/actions";
+import { validateMediaFile, MAX_ATTACHMENTS, MAX_CONTENT_LENGTH } from "@/lib/validations/message";
+import { sendMessage, type SendMessageState } from "@/app/[username]/actions";
 import { cn } from "@/lib/utils";
 
-type MessageType = "text" | "image" | "audio" | "video";
-
-const TYPES: { id: MessageType; label: string; icon: typeof MessageSquareText }[] = [
-  { id: "text", label: "Text", icon: MessageSquareText },
-  { id: "image", label: "Image", icon: ImageIcon },
-  { id: "audio", label: "Voice", icon: Mic },
-  { id: "video", label: "Video", icon: Video },
-];
-
-const TEXT_MAX = 500;
+function syncFileInput(ref: React.RefObject<HTMLInputElement | null>, files: File[]) {
+  if (!ref.current) return;
+  const dt = new DataTransfer();
+  files.forEach((file) => dt.items.add(file));
+  ref.current.files = dt.files;
+}
 
 export function MessageComposer({ username }: { username: string }) {
   const [resetKey, setResetKey] = useState(0);
@@ -48,51 +34,33 @@ function ComposerBody({
   username: string;
   onSendAnother: () => void;
 }) {
-  const [type, setType] = useState<MessageType>("text");
-  const [charCount, setCharCount] = useState(0);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [content, setContent] = useState("");
+  const [attachments, setAttachments] = useState<PickedAttachment[]>([]);
   const [audioFile, setAudioFile] = useState<File | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [micOpen, setMicOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const [textState, textFormAction, textPending] = useActionState<SendMessageState, FormData>(
-    sendTextMessage,
-    undefined,
-  );
-  const [imageState, imageFormAction, imagePending] = useActionState<SendMessageState, FormData>(
-    sendMediaMessage.bind(null, "image"),
-    undefined,
-  );
-  const [audioState, audioFormAction, audioPending] = useActionState<SendMessageState, FormData>(
-    sendMediaMessage.bind(null, "audio"),
-    undefined,
-  );
-  const [videoState, videoFormAction, videoPending] = useActionState<SendMessageState, FormData>(
-    sendMediaMessage.bind(null, "video"),
+  const [state, formAction, isPending] = useActionState<SendMessageState, FormData>(
+    sendMessage,
     undefined,
   );
 
-  const stateByType = { text: textState, image: imageState, audio: audioState, video: videoState };
-  const pendingByType = { text: textPending, image: imagePending, audio: audioPending, video: videoPending };
-  const activeState = stateByType[type];
-  const isPending = pendingByType[type];
-
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagesInputRef = useRef<HTMLInputElement>(null);
+  const videosInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
 
-  const syncFileInput = (ref: React.RefObject<HTMLInputElement | null>, file: File | null) => {
-    if (!ref.current) return;
-    const dt = new DataTransfer();
-    if (file) dt.items.add(file);
-    ref.current.files = dt.files;
-  };
+  useEffect(
+    () => syncFileInput(imagesInputRef, attachments.filter((a) => a.type === "image").map((a) => a.file)),
+    [attachments],
+  );
+  useEffect(
+    () => syncFileInput(videosInputRef, attachments.filter((a) => a.type === "video").map((a) => a.file)),
+    [attachments],
+  );
+  useEffect(() => syncFileInput(audioInputRef, audioFile ? [audioFile] : []), [audioFile]);
 
-  useEffect(() => syncFileInput(imageInputRef, imageFile), [imageFile]);
-  useEffect(() => syncFileInput(audioInputRef, audioFile), [audioFile]);
-  useEffect(() => syncFileInput(videoInputRef, videoFile), [videoFile]);
-
-  if (activeState?.status === "success") {
+  if (state?.status === "success") {
     return (
       <div className="relative flex flex-col items-center gap-4 py-6 text-center">
         <span className="absolute top-2 left-[15%] size-2 rounded-xs bg-amber-300" style={{ animation: "whispr-float 4s ease-in-out infinite" }} />
@@ -119,85 +87,132 @@ function ComposerBody({
     );
   }
 
-  const activeAction = { text: textFormAction, image: imageFormAction, audio: audioFormAction, video: videoFormAction }[type];
-  const canSend =
-    type === "text" ? true : type === "image" ? !!imageFile : type === "video" ? !!videoFile : !!audioFile;
+  const handlePickFiles = (fileList: FileList | null) => {
+    if (!fileList) return;
+    const remaining = MAX_ATTACHMENTS - attachments.length;
+    const picked = Array.from(fileList).slice(0, remaining);
+
+    for (const file of picked) {
+      const type = file.type.startsWith("video/") ? "video" : "image";
+      const error = validateMediaFile(type, file);
+      if (error) {
+        setLocalError(error);
+        continue;
+      }
+      setAttachments((prev) => [...prev, { id: crypto.randomUUID(), type, file }]);
+    }
+    if (fileList.length > remaining) {
+      setLocalError(`You can attach up to ${MAX_ATTACHMENTS} files`);
+    }
+  };
+
+  const canSend = content.trim().length > 0 || attachments.length > 0 || !!audioFile;
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-4 gap-1.5 rounded-full border border-white/10 bg-white/5 p-1.5">
-        {TYPES.map((t) => (
+    <form
+      action={formAction}
+      className={cn("flex flex-col gap-3", isPending && "opacity-70")}
+      noValidate
+    >
+      <input type="hidden" name="username" value={username} />
+      <input ref={imagesInputRef} type="file" name="images" className="hidden" />
+      <input ref={videosInputRef} type="file" name="videos" className="hidden" />
+      <input ref={audioInputRef} type="file" name="audio" className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          handlePickFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
+
+      {micOpen ? (
+        <div className="relative rounded-2xl border border-white/15 bg-white/4">
           <button
-            key={t.id}
             type="button"
-            onClick={() => {
-              setType(t.id);
-              setLocalError(null);
-            }}
-            className={cn(
-              "flex flex-col items-center gap-1 rounded-full py-2 text-xs font-medium transition-colors",
-              type === t.id
-                ? "bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 text-white shadow-md shadow-fuchsia-500/20"
-                : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
-            )}
+            onClick={() => setMicOpen(false)}
+            className="absolute top-2.5 right-2.5 z-10 flex size-7 items-center justify-center rounded-full bg-black/50 text-white"
           >
-            <t.icon className="size-4" />
-            {t.label}
+            <X className="size-3.5" />
           </button>
-        ))}
-      </div>
+          <VoiceRecorder
+            file={audioFile}
+            onFileChange={(file) => {
+              setAudioFile(file);
+              if (file) setMicOpen(false);
+            }}
+            onError={setLocalError}
+          />
+        </div>
+      ) : (
+        <>
+          <AttachmentStrip
+            attachments={attachments}
+            audioFile={audioFile}
+            onRemove={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
+            onRemoveAudio={() => setAudioFile(null)}
+          />
 
-      <form action={activeAction} className={cn("flex flex-col gap-3", isPending && "opacity-70")} noValidate>
-        <input type="hidden" name="username" value={username} />
-
-        {type === "text" && (
           <div className="space-y-1.5">
             <textarea
               name="content"
-              rows={5}
-              maxLength={TEXT_MAX}
+              rows={3}
+              maxLength={MAX_CONTENT_LENGTH}
               placeholder={`Say something anonymous to @${username}...`}
-              onChange={(e) => setCharCount(e.target.value.length)}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               className="w-full resize-none rounded-2xl border border-white/15 bg-input/30 px-4 py-3 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span />
-              <span>{charCount}/{TEXT_MAX}</span>
+              <span>{content.length}/{MAX_CONTENT_LENGTH}</span>
             </div>
           </div>
-        )}
+        </>
+      )}
 
-        {type === "image" && (
-          <>
-            <input ref={imageInputRef} type="file" name="file" className="hidden" />
-            <MediaDropzone type="image" file={imageFile} onFileChange={setImageFile} onError={setLocalError} />
-          </>
-        )}
+      {(localError || state?.status === "error") && (
+        <p className="text-center text-sm text-destructive">
+          {localError ?? (state?.status === "error" ? state.message : "")}
+        </p>
+      )}
 
-        {type === "video" && (
-          <>
-            <input ref={videoInputRef} type="file" name="file" className="hidden" />
-            <MediaDropzone type="video" file={videoFile} onFileChange={setVideoFile} onError={setLocalError} />
-          </>
-        )}
-
-        {type === "audio" && (
-          <>
-            <input ref={audioInputRef} type="file" name="file" className="hidden" />
-            <VoiceRecorder file={audioFile} onFileChange={setAudioFile} onError={setLocalError} />
-          </>
-        )}
-
-        {(localError || activeState?.status === "error") && (
-          <p className="text-center text-sm text-destructive">
-            {localError ?? (activeState?.status === "error" ? activeState.message : "")}
-          </p>
-        )}
-
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            setLocalError(null);
+            fileInputRef.current?.click();
+          }}
+          className="size-12.5 shrink-0 rounded-full border-white/15 bg-white/5"
+        >
+          <Paperclip className="size-4.5" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            setLocalError(null);
+            setMicOpen(true);
+          }}
+          className={cn(
+            "size-12.5 shrink-0 rounded-full border-white/15 bg-white/5",
+            audioFile && "border-amber-400/50 text-amber-300",
+          )}
+        >
+          <Mic className="size-4.5" />
+        </Button>
         <Button
           type="submit"
-          disabled={!canSend || isPending}
-          className="h-12.5 w-full rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 transition-transform hover:scale-[1.01] hover:opacity-90 disabled:from-white/10 disabled:via-white/10 disabled:to-white/10 disabled:text-muted-foreground disabled:shadow-none disabled:hover:scale-100"
+          disabled={!canSend || isPending || micOpen}
+          className="h-12.5 flex-1 gap-2 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 transition-transform hover:scale-[1.01] hover:opacity-90 disabled:from-white/10 disabled:via-white/10 disabled:to-white/10 disabled:text-muted-foreground disabled:shadow-none disabled:hover:scale-100"
         >
           {isPending ? (
             <>
@@ -205,10 +220,13 @@ function ComposerBody({
               Sending…
             </>
           ) : (
-            "Send whisper"
+            <>
+              <Send className="size-4" />
+              Send
+            </>
           )}
         </Button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }
