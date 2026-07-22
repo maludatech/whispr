@@ -93,7 +93,11 @@
       "Bash(taskkill //F //PID 21036)",
       "Bash(node check-stage3.mjs)",
       "Bash(taskkill //F //PID 19812)",
-      "Bash(rm -f check-stage3.mjs check-disabled-button.png check-enabled-button.png check-dashboard-grid.png)"
+      "Bash(rm -f check-stage3.mjs check-disabled-button.png check-enabled-button.png check-dashboard-grid.png)",
+      "Bash(taskkill //F //PID 26004)",
+      "Bash(nohup npm run dev)",
+      "Bash(node check-stage4.mjs)",
+      "Bash(rm -f check-stage4.mjs debug-composer.png)"
     ]
   }
 }

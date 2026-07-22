@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { X, Video as VideoIcon, Mic } from "lucide-react";
+import { useObjectUrlRef } from "@/lib/use-object-url";
 
 export type PickedAttachment = {
   id: string;
@@ -10,16 +10,16 @@ export type PickedAttachment = {
 };
 
 function Thumb({ attachment, onRemove }: { attachment: PickedAttachment; onRemove: () => void }) {
-  const previewUrl = useMemo(() => URL.createObjectURL(attachment.file), [attachment.file]);
-  useEffect(() => () => URL.revokeObjectURL(previewUrl), [previewUrl]);
+  const imgRef = useObjectUrlRef<HTMLImageElement>(attachment.type === "image" ? attachment.file : null);
+  const videoRef = useObjectUrlRef<HTMLVideoElement>(attachment.type === "video" ? attachment.file : null);
 
   return (
     <div className="relative size-18 shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black/40">
       {attachment.type === "image" ? (
-        <img src={previewUrl} alt="Attached" className="size-full object-cover" />
+        <img ref={imgRef} alt="Attached" className="size-full object-cover" />
       ) : (
         <>
-          <video src={previewUrl} muted className="size-full object-cover" />
+          <video ref={videoRef} muted className="size-full object-cover" />
           <VideoIcon className="absolute right-1 bottom-1 size-3.5 text-white drop-shadow" />
         </>
       )}

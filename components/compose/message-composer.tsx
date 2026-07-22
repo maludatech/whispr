@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Paperclip, Mic, Send, Sparkles, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AttachmentStrip, type PickedAttachment } from "@/components/compose/attachment-strip";
 import { VoiceRecorder } from "@/components/compose/voice-recorder";
@@ -60,6 +61,15 @@ function ComposerBody({
   );
   useEffect(() => syncFileInput(audioInputRef, audioFile ? [audioFile] : []), [audioFile]);
 
+  const reportError = (message: string) => {
+    setLocalError(message);
+    toast.error(message);
+  };
+
+  useEffect(() => {
+    if (state?.status === "error") toast.error(state.message);
+  }, [state]);
+
   if (state?.status === "success") {
     return (
       <div className="relative flex flex-col items-center gap-4 py-6 text-center">
@@ -96,13 +106,13 @@ function ComposerBody({
       const type = file.type.startsWith("video/") ? "video" : "image";
       const error = validateMediaFile(type, file);
       if (error) {
-        setLocalError(error);
+        reportError(error);
         continue;
       }
       setAttachments((prev) => [...prev, { id: crypto.randomUUID(), type, file }]);
     }
     if (fileList.length > remaining) {
-      setLocalError(`You can attach up to ${MAX_ATTACHMENTS} files`);
+      reportError(`You can attach up to ${MAX_ATTACHMENTS} files`);
     }
   };
 
@@ -145,7 +155,7 @@ function ComposerBody({
               setAudioFile(file);
               if (file) setMicOpen(false);
             }}
-            onError={setLocalError}
+            onError={reportError}
           />
         </div>
       ) : (

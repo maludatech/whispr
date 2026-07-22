@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mic, Square, RotateCcw } from "lucide-react";
 import { validateMediaFile } from "@/lib/validations/message";
+import { useObjectUrlRef } from "@/lib/use-object-url";
 
 const MAX_SECONDS = 60;
 const BAR_COUNT = 8;
@@ -119,17 +120,12 @@ export function VoiceRecorder({
     setRecording(false);
   };
 
-  const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
+  const audioRef = useObjectUrlRef<HTMLAudioElement>(file);
 
   if (file && !recording) {
     return (
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/15 bg-white/4 px-4 py-8">
-        <audio controls src={previewUrl!} className="w-full" />
+        <audio ref={audioRef} controls className="w-full" />
         <button
           type="button"
           onClick={() => onFileChange(null)}
