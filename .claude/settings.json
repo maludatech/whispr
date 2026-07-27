@@ -116,7 +116,8 @@
       "Bash(taskkill //F //PID 25744)",
       "Bash(rm -rf .next)",
       "Bash(curl -s -o /dev/null -w \"register: %{http_code}\\\\n\" http://localhost:3000/register)",
-      "Bash(rm -f check-stage6.mjs check-card-affordance.png check-overlay-dark.png)"
+      "Bash(rm -f check-stage6.mjs check-card-affordance.png check-overlay-dark.png)",
+      "Bash(rm -rf app/generated/prisma)"
     ]
   }
 }
