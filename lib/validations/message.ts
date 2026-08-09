@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const STORAGE_BUCKET = "messages";
+
 export const MEDIA_LIMITS = {
   image: { maxBytes: 10 * 1024 * 1024, label: "10MB", mimePrefix: "image/" },
   audio: { maxBytes: 20 * 1024 * 1024, label: "20MB", mimePrefix: "audio/" },

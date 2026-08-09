@@ -7,15 +7,9 @@ import { Button } from "@/components/ui/button";
 import { AttachmentStrip, type PickedAttachment } from "@/components/compose/attachment-strip";
 import { VoiceRecorder } from "@/components/compose/voice-recorder";
 import { validateMediaFile, MAX_ATTACHMENTS, MAX_CONTENT_LENGTH } from "@/lib/validations/message";
-import { sendMessage, type SendMessageState } from "@/app/[username]/actions";
+import { uploadAttachment } from "@/lib/upload-client";
+import { sendMessage, type SendMessageInput, type SendMessageState } from "@/app/[username]/actions";
 import { cn } from "@/lib/utils";
-
-function syncFileInput(ref: React.RefObject<HTMLInputElement | null>, files: File[]) {
-  if (!ref.current) return;
-  const dt = new DataTransfer();
-  files.forEach((file) => dt.items.add(file));
-  ref.current.files = dt.files;
-}
 
 const HEIC_BRANDS = ["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevs", "mif1", "msf1"];
 
@@ -72,26 +66,14 @@ function ComposerBody({
   const [micOpen, setMicOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const [state, formAction, isPending] = useActionState<SendMessageState, FormData>(
+  const [state, dispatch, isPending] = useActionState<SendMessageState, SendMessageInput>(
     sendMessage,
     undefined,
   );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const imagesInputRef = useRef<HTMLInputElement>(null);
-  const videosInputRef = useRef<HTMLInputElement>(null);
-  const audioInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(
-    () => syncFileInput(imagesInputRef, attachments.filter((a) => a.type === "image").map((a) => a.file)),
-    [attachments],
-  );
-  useEffect(
-    () => syncFileInput(videosInputRef, attachments.filter((a) => a.type === "video").map((a) => a.file)),
-    [attachments],
-  );
-  useEffect(() => syncFileInput(audioInputRef, audioFile ? [audioFile] : []), [audioFile]);
 
   const reportError = (message: string) => {
     setLocalError(message);
@@ -162,18 +144,33 @@ function ComposerBody({
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLocalError(null);
+
+    try {
+      setUploading(true);
+      const uploaded = await Promise.all([
+        ...attachments.map((a) => uploadAttachment(username, a.type, a.file)),
+        ...(audioFile ? [uploadAttachment(username, "audio", audioFile)] : []),
+      ]);
+      setUploading(false);
+      dispatch({ username, content, attachments: uploaded });
+    } catch (err) {
+      setUploading(false);
+      reportError(err instanceof Error ? err.message : "Upload failed, try again");
+    }
+  };
+
   const canSend = content.trim().length > 0 || attachments.length > 0 || !!audioFile;
+  const busy = uploading || isPending;
 
   return (
     <form
-      action={formAction}
-      className={cn("flex flex-col gap-3", isPending && "opacity-70")}
+      onSubmit={handleSubmit}
+      className={cn("flex flex-col gap-3", busy && "opacity-70")}
       noValidate
     >
-      <input type="hidden" name="username" value={username} />
-      <input ref={imagesInputRef} type="file" name="images" className="hidden" />
-      <input ref={videosInputRef} type="file" name="videos" className="hidden" />
-      <input ref={audioInputRef} type="file" name="audio" className="hidden" />
       <input
         ref={fileInputRef}
         type="file"
@@ -253,7 +250,7 @@ function ComposerBody({
           type="button"
           variant="outline"
           size="icon"
-          disabled={attachments.length >= MAX_ATTACHMENTS || converting}
+          disabled={attachments.length >= MAX_ATTACHMENTS || converting || busy}
           onClick={() => {
             setLocalError(null);
             fileInputRef.current?.click();
@@ -266,6 +263,7 @@ function ComposerBody({
           type="button"
           variant="outline"
           size="icon"
+          disabled={converting || busy}
           onClick={() => {
             setLocalError(null);
             setMicOpen(true);
@@ -279,13 +277,13 @@ function ComposerBody({
         </Button>
         <Button
           type="submit"
-          disabled={!canSend || isPending || micOpen || converting}
+          disabled={!canSend || busy || micOpen || converting}
           className="h-12.5 flex-1 gap-2 rounded-full border border-white/10 bg-white/5 text-base font-semibold text-muted-foreground shadow-none transition-transform enabled:border-transparent enabled:bg-linear-to-r enabled:from-violet-500 enabled:via-fuchsia-500 enabled:to-amber-400 enabled:text-white enabled:shadow-lg enabled:shadow-fuchsia-500/30 enabled:hover:scale-[1.01] enabled:hover:opacity-90"
         >
-          {isPending ? (
+          {busy ? (
             <>
               <Loader2 className="size-4 animate-spin" />
-              Sending…
+              {uploading ? "Uploading…" : "Sending…"}
             </>
           ) : (
             <>

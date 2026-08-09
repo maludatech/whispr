@@ -1,19 +1,18 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
+import { STORAGE_BUCKET as BUCKET } from "@/lib/validations/message";
 
-const BUCKET = "messages";
-
-export async function uploadMedia(file: File, folder: string) {
-  const ext = file.name.split(".").pop() || "bin";
+export async function createSignedUploadPath(filename: string, folder: string) {
+  const ext = filename.split(".").pop() || "bin";
   const path = `${folder}/${crypto.randomUUID()}.${ext}`;
 
-  const { error } = await supabaseAdmin.storage
+  const { data, error } = await supabaseAdmin.storage
     .from(BUCKET)
-    .upload(path, file, { contentType: file.type });
+    .createSignedUploadUrl(path);
 
   if (error) throw error;
 
-  return path;
+  return { path, token: data.token };
 }
 
 export async function deleteMedia(path: string) {

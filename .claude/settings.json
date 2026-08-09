@@ -131,7 +131,21 @@
       "Bash(rm -f check-heic.mjs)",
       "Bash(node check-heic-sniff.mjs)",
       "Bash(node check-jpeg-regress.mjs)",
-      "Bash(rm -f check-heic-sniff.mjs check-jpeg-regress.mjs)"
+      "Bash(rm -f check-heic-sniff.mjs check-jpeg-regress.mjs)",
+      "Bash(taskkill //F //PID 24808)",
+      "Bash(node check-direct-upload.mjs)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} in %{time_total}s\\\\n\" https://gqqmsxqtmnajddavrawc.supabase.co/storage/v1/bucket -H \"Authorization: Bearer test\" --max-time 10)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} in %{time_total}s\\\\n\" https://gqqmsxqtmnajddavrawc.supabase.co --max-time 10)",
+      "Bash(curl -s -o /dev/null -w \"google: HTTP %{http_code} in %{time_total}s\\\\n\" https://google.com --max-time 8)",
+      "Bash(nslookup gqqmsxqtmnajddavrawc.supabase.co)",
+      "Bash(nslookup gqqmsxqtmnajddavrawc.supabase.co 8.8.8.8)",
+      "Bash(nslookup supabase.co 8.8.8.8)",
+      "Bash(nslookup app.supabase.com 8.8.8.8)",
+      "Bash(rm -f check-direct-upload.mjs)",
+      "Bash(taskkill //F //PID 5400)",
+      "Bash(node check-final.mjs)",
+      "Bash(rm -f check-final.mjs)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

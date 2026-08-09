@@ -1,13 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { uploadMedia } from "@/lib/storage";
+import { createSignedUploadPath } from "@/lib/storage";
 import { classifyTopic } from "@/lib/groq";
 import {
   MEDIA_LIMITS,
   MAX_ATTACHMENTS,
   MAX_CONTENT_LENGTH,
-  validateMediaFile,
   type MediaType,
 } from "@/lib/validations/message";
 
@@ -22,50 +21,32 @@ export type SendMessageState =
     }
   | undefined;
 
-function collectFiles(formData: FormData, field: string) {
-  return formData.getAll(field).filter((entry): entry is File => entry instanceof File && entry.size > 0);
-}
+export type SendMessageInput = {
+  username: string;
+  content: string;
+  attachments: { type: MediaType; mediaUrl: string }[];
+};
 
 export async function sendMessage(
   _prevState: SendMessageState,
-  formData: FormData,
+  input: SendMessageInput,
 ): Promise<SendMessageState> {
-  const username = formData.get("username");
-  if (typeof username !== "string" || !username) {
+  const { username, attachments } = input;
+  if (!username) {
     return { status: "error", message: "Missing link" };
   }
 
-  const rawContent = formData.get("content");
-  const content = typeof rawContent === "string" ? rawContent.trim() : "";
+  const content = input.content.trim();
   if (content.length > MAX_CONTENT_LENGTH) {
     return { status: "error", message: `At most ${MAX_CONTENT_LENGTH} characters` };
   }
 
-  const images = collectFiles(formData, "images");
-  const videos = collectFiles(formData, "videos");
-  const audioFiles = collectFiles(formData, "audio");
-  const audio = audioFiles[0] ?? null;
-
-  const files: { type: MediaType; file: File }[] = [
-    ...images.map((file) => ({ type: "image" as const, file })),
-    ...videos.map((file) => ({ type: "video" as const, file })),
-    ...(audio ? [{ type: "audio" as const, file: audio }] : []),
-  ];
-
-  if (!content && files.length === 0) {
+  if (!content && attachments.length === 0) {
     return { status: "error", message: "Say something or attach a file first" };
   }
 
-  if (files.length > MAX_ATTACHMENTS) {
+  if (attachments.length > MAX_ATTACHMENTS) {
     return { status: "error", message: `Attach up to ${MAX_ATTACHMENTS} files` };
-  }
-
-  for (const { type, file } of files) {
-    const fileError = validateMediaFile(type, file);
-    if (fileError) return { status: "error", message: fileError };
-    if (file.size > MEDIA_LIMITS[type].maxBytes) {
-      return { status: "error", message: `Keep each ${type} under ${MEDIA_LIMITS[type].label}` };
-    }
   }
 
   const receiver = await prisma.user.findUnique({
@@ -77,18 +58,6 @@ export async function sendMessage(
     return { status: "error", message: "This link doesn't exist anymore" };
   }
 
-  let uploaded: { type: MediaType; mediaUrl: string }[];
-  try {
-    uploaded = await Promise.all(
-      files.map(async ({ type, file }) => ({
-        type,
-        mediaUrl: await uploadMedia(file, receiver.id),
-      })),
-    );
-  } catch {
-    return { status: "error", message: "Upload failed, try again" };
-  }
-
   const topic = content ? await classifyTopic(content) : "Media";
 
   await prisma.message.create({
@@ -96,9 +65,47 @@ export async function sendMessage(
       receiverId: receiver.id,
       content: content || null,
       topic,
-      attachments: { create: uploaded },
+      attachments: { create: attachments },
     },
   });
 
   return { status: "success" };
+}
+
+export type UploadUrlResult =
+  | { status: "error"; message: string }
+  | { status: "success"; path: string; token: string };
+
+export async function createUploadUrl(
+  username: string,
+  type: MediaType,
+  file: { name: string; size: number; mimeType: string },
+): Promise<UploadUrlResult> {
+  if (!username) {
+    return { status: "error", message: "Missing link" };
+  }
+
+  const limit = MEDIA_LIMITS[type];
+  if (!file.mimeType.startsWith(limit.mimePrefix)) {
+    return { status: "error", message: `That doesn't look like a${type === "audio" ? "n" : ""} ${type} file` };
+  }
+  if (file.size > limit.maxBytes) {
+    return { status: "error", message: `Keep each ${type} under ${limit.label}` };
+  }
+
+  const receiver = await prisma.user.findUnique({
+    where: { username },
+    select: { id: true },
+  });
+
+  if (!receiver) {
+    return { status: "error", message: "This link doesn't exist anymore" };
+  }
+
+  try {
+    const { path, token } = await createSignedUploadPath(file.name, receiver.id);
+    return { status: "success", path, token };
+  } catch {
+    return { status: "error", message: "Couldn't prepare upload, try again" };
+  }
 }
