@@ -17,6 +17,21 @@ function syncFileInput(ref: React.RefObject<HTMLInputElement | null>, files: Fil
   ref.current.files = dt.files;
 }
 
+function isHeic(file: File) {
+  const type = file.type.toLowerCase();
+  return type === "image/heic" || type === "image/heif" || /\.hei[cf]$/i.test(file.name);
+}
+
+async function toJpegIfHeic(file: File): Promise<File> {
+  if (!isHeic(file)) return file;
+  const heic2any = (await import("heic2any")).default;
+  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+  const converted = Array.isArray(result) ? result[0] : result;
+  return new File([converted], file.name.replace(/\.hei[cf]$/i, ".jpg") || "photo.jpg", {
+    type: "image/jpeg",
+  });
+}
+
 export function MessageComposer({ username }: { username: string }) {
   const [resetKey, setResetKey] = useState(0);
   return (
@@ -40,6 +55,7 @@ function ComposerBody({
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [micOpen, setMicOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [converting, setConverting] = useState(false);
 
   const [state, formAction, isPending] = useActionState<SendMessageState, FormData>(
     sendMessage,
@@ -97,12 +113,23 @@ function ComposerBody({
     );
   }
 
-  const handlePickFiles = (fileList: FileList | null) => {
+  const handlePickFiles = async (fileList: FileList | null) => {
     if (!fileList) return;
     const remaining = MAX_ATTACHMENTS - attachments.length;
     const picked = Array.from(fileList).slice(0, remaining);
 
-    for (const file of picked) {
+    const hasHeic = picked.some(isHeic);
+    if (hasHeic) setConverting(true);
+
+    for (const original of picked) {
+      let file: File;
+      try {
+        file = await toJpegIfHeic(original);
+      } catch {
+        reportError(`Couldn't process ${original.name || "that photo"} — try a different format`);
+        continue;
+      }
+
       const type = file.type.startsWith("video/") ? "video" : "image";
       const error = validateMediaFile(type, file);
       if (error) {
@@ -111,6 +138,8 @@ function ComposerBody({
       }
       setAttachments((prev) => [...prev, { id: crypto.randomUUID(), type, file }]);
     }
+
+    if (hasHeic) setConverting(false);
     if (fileList.length > remaining) {
       reportError(`You can attach up to ${MAX_ATTACHMENTS} files`);
     }
@@ -166,6 +195,12 @@ function ComposerBody({
             onRemove={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
             onRemoveAudio={() => setAudioFile(null)}
           />
+          {converting && (
+            <span className="-mt-2 flex items-center gap-1.5 self-start text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              Converting photo…
+            </span>
+          )}
           {attachments.length > 0 && (
             <span className="-mt-2 self-end text-xs text-muted-foreground">
               {attachments.length}/{MAX_ATTACHMENTS} attached
@@ -201,7 +236,7 @@ function ComposerBody({
           type="button"
           variant="outline"
           size="icon"
-          disabled={attachments.length >= MAX_ATTACHMENTS}
+          disabled={attachments.length >= MAX_ATTACHMENTS || converting}
           onClick={() => {
             setLocalError(null);
             fileInputRef.current?.click();
@@ -227,7 +262,7 @@ function ComposerBody({
         </Button>
         <Button
           type="submit"
-          disabled={!canSend || isPending || micOpen}
+          disabled={!canSend || isPending || micOpen || converting}
           className="h-12.5 flex-1 gap-2 rounded-full border border-white/10 bg-white/5 text-base font-semibold text-muted-foreground shadow-none transition-transform enabled:border-transparent enabled:bg-linear-to-r enabled:from-violet-500 enabled:via-fuchsia-500 enabled:to-amber-400 enabled:text-white enabled:shadow-lg enabled:shadow-fuchsia-500/30 enabled:hover:scale-[1.01] enabled:hover:opacity-90"
         >
           {isPending ? (

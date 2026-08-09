@@ -117,7 +117,18 @@
       "Bash(rm -rf .next)",
       "Bash(curl -s -o /dev/null -w \"register: %{http_code}\\\\n\" http://localhost:3000/register)",
       "Bash(rm -f check-stage6.mjs check-card-affordance.png check-overlay-dark.png)",
-      "Bash(rm -rf app/generated/prisma)"
+      "Bash(rm -rf app/generated/prisma)",
+      "Bash(tasklist //FI \"PID eq 20388\")",
+      "Bash(node check-image-bug.mjs)",
+      "Bash(node check-image-bug2.mjs)",
+      "Bash(wmic process *)",
+      "Bash(rm -f check-image-bug.mjs check-image-bug2.mjs check-image-bug2.png)",
+      "Bash(sleep 15 && cat /dev/null)",
+      "Read(//dev/**)",
+      "Bash(find /c/Users/USER/Desktop/projects/saas/whispr/node_modules/heic2any -iname \"*.heic\" -o -iname \"*.heif\" 2>/dev/null | head -5 *)",
+      "Read(//c//**)",
+      "Bash(node check-heic.mjs)",
+      "Bash(rm -f check-heic.mjs)"
     ]
   }
 }
