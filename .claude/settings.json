@@ -148,7 +148,10 @@
       "Bash(git check-ignore *)",
       "Bash(taskkill //F //PID 4176)",
       "Bash(node check-polling.mjs)",
-      "Bash(rm -f check-polling.mjs)"
+      "Bash(rm -f check-polling.mjs)",
+      "Bash(taskkill //F //PID 26524)",
+      "Bash(node check-lightbox.mjs)",
+      "Bash(rm -f check-lightbox.mjs check-lightbox.png)"
     ]
   }
 }

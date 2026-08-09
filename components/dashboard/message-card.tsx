@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { ShareRow } from "@/components/dashboard/share-row";
+import { MediaLightbox } from "@/components/dashboard/media-lightbox";
 import { deleteMessage } from "@/app/(dashboard)/dashboard/actions";
 
 type AttachmentType = "image" | "audio" | "video";
@@ -84,25 +85,43 @@ function TypeBadges({ content, attachments }: Pick<MessageCardProps, "content" |
 
 const MAX_GRID_TILES = 4;
 
-function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
+function VisualGrid({
+  items,
+  full,
+  onItemClick,
+}: {
+  items: Attachment[];
+  full: boolean;
+  onItemClick?: (index: number) => void;
+}) {
   if (items.length === 0) return null;
 
   if (items.length === 1) {
     const item = items[0];
-    return item.type === "image" ? (
+    if (item.type === "video") {
+      return (
+        <video
+          controls
+          playsInline
+          preload="auto"
+          src={item.mediaUrl}
+          className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
+        />
+      );
+    }
+    const image = (
       <img
         src={item.mediaUrl}
         alt="Anonymous submission"
         className={`w-full rounded-2xl ${full ? "max-h-[70vh] object-contain" : "max-h-80 object-cover"}`}
       />
+    );
+    return onItemClick ? (
+      <button type="button" onClick={() => onItemClick(0)} className="cursor-pointer">
+        {image}
+      </button>
     ) : (
-      <video
-        controls
-        playsInline
-        preload="auto"
-        src={item.mediaUrl}
-        className={`w-full rounded-2xl ${full ? "max-h-[70vh]" : "max-h-80 object-cover"}`}
-      />
+      image
     );
   }
 
@@ -115,7 +134,12 @@ function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
         const isLastTile = index === tiles.length - 1;
         const showOverflow = isLastTile && overflowCount > 0;
         return (
-          <div key={item.id} className="relative aspect-square overflow-hidden rounded-xl bg-black/40">
+          <button
+            type="button"
+            key={item.id}
+            onClick={onItemClick ? () => onItemClick(index) : undefined}
+            className={`relative aspect-square overflow-hidden rounded-xl bg-black/40 ${onItemClick ? "cursor-pointer" : ""}`}
+          >
             {item.type === "image" ? (
               <img src={item.mediaUrl} alt="Anonymous submission" className="size-full object-cover" />
             ) : (
@@ -131,7 +155,7 @@ function VisualGrid({ items, full }: { items: Attachment[]; full: boolean }) {
                 +{overflowCount}
               </div>
             )}
-          </div>
+          </button>
         );
       })}
     </div>
@@ -142,7 +166,11 @@ function MessageBody({
   content,
   attachments,
   full = false,
-}: Pick<MessageCardProps, "content" | "attachments"> & { full?: boolean }) {
+  onMediaClick,
+}: Pick<MessageCardProps, "content" | "attachments"> & {
+  full?: boolean;
+  onMediaClick?: (index: number) => void;
+}) {
   const visual = attachments.filter((a) => a.type === "image" || a.type === "video");
   const audio = attachments.filter((a) => a.type === "audio");
 
@@ -153,7 +181,7 @@ function MessageBody({
           {content}
         </p>
       )}
-      <VisualGrid items={visual} full={full} />
+      <VisualGrid items={visual} full={full} onItemClick={onMediaClick} />
       {audio.map((attachment) => (
         <audio key={attachment.id} controls src={attachment.mediaUrl} className="w-full" />
       ))}
@@ -164,6 +192,11 @@ function MessageBody({
 export function MessageCard({ id, username, content, attachments, topic, createdAt }: MessageCardProps) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const visualAttachments = attachments.filter(
+    (a): a is Attachment & { type: "image" | "video" } => a.type === "image" || a.type === "video",
+  );
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -215,7 +248,12 @@ export function MessageCard({ id, username, content, attachments, topic, created
               <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
             </div>
 
-            <MessageBody content={content} attachments={attachments} full />
+            <MessageBody
+              content={content}
+              attachments={attachments}
+              full
+              onMediaClick={setLightboxIndex}
+            />
 
             <ShareRow username={username} />
 
@@ -283,6 +321,13 @@ export function MessageCard({ id, username, content, attachments, topic, created
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MediaLightbox
+        items={visualAttachments}
+        index={lightboxIndex}
+        onIndexChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
     </div>
   );
 }
