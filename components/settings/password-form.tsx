@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { changePassword, type PasswordState } from "@/app/(dashboard)/dashboard/settings/actions";
@@ -13,10 +13,9 @@ export function PasswordForm() {
     <form action={formAction} className="space-y-4" noValidate>
       <div className="space-y-1.5">
         <Label htmlFor="currentPassword">Current password</Label>
-        <Input
+        <PasswordInput
           id="currentPassword"
           name="currentPassword"
-          type="password"
           autoComplete="current-password"
           required
           className="h-11 rounded-xl"
@@ -28,10 +27,9 @@ export function PasswordForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="newPassword">New password</Label>
-        <Input
+        <PasswordInput
           id="newPassword"
           name="newPassword"
-          type="password"
           autoComplete="new-password"
           required
           className="h-11 rounded-xl"
@@ -43,10 +41,9 @@ export function PasswordForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="confirmPassword">Confirm new password</Label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           required
           className="h-11 rounded-xl"

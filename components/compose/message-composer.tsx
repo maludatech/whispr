@@ -148,13 +148,15 @@ function ComposerBody({
     e.preventDefault();
     setLocalError(null);
 
+    const hasFilesToUpload = attachments.length > 0 || !!audioFile;
+
     try {
-      setUploading(true);
+      if (hasFilesToUpload) setUploading(true);
       const uploaded = await Promise.all([
         ...attachments.map((a) => uploadAttachment(username, a.type, a.file)),
         ...(audioFile ? [uploadAttachment(username, "audio", audioFile)] : []),
       ]);
-      setUploading(false);
+      if (hasFilesToUpload) setUploading(false);
       dispatch({ username, content, attachments: uploaded });
     } catch (err) {
       setUploading(false);

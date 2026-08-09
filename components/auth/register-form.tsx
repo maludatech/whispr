@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { register, type RegisterState } from "@/app/(auth)/register/actions";
@@ -50,10 +51,9 @@ export function RegisterForm() {
 
       <div className="space-y-1.5">
         <Label htmlFor="password">Password</Label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           placeholder="At least 8 characters"
           autoComplete="new-password"
           required

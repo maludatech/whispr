@@ -151,7 +151,13 @@
       "Bash(rm -f check-polling.mjs)",
       "Bash(taskkill //F //PID 26524)",
       "Bash(node check-lightbox.mjs)",
-      "Bash(rm -f check-lightbox.mjs check-lightbox.png)"
+      "Bash(rm -f check-lightbox.mjs check-lightbox.png)",
+      "Bash(taskkill //F //PID 31420)",
+      "Bash(node check-password-toggle.mjs)",
+      "Bash(tail -40 /tmp/dev.log)",
+      "Bash(node check-settings-toggle.mjs)",
+      "Bash(node check-send-label.mjs)",
+      "Bash(rm -f check-password-toggle.mjs check-settings-toggle.mjs check-send-label.mjs)"
     ]
   }
 }
