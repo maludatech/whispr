@@ -17,13 +17,29 @@ function syncFileInput(ref: React.RefObject<HTMLInputElement | null>, files: Fil
   ref.current.files = dt.files;
 }
 
-function isHeic(file: File) {
+const HEIC_BRANDS = ["heic", "heix", "hevc", "hevx", "heim", "heis", "hevm", "hevs", "mif1", "msf1"];
+
+async function isHeic(file: File): Promise<boolean> {
   const type = file.type.toLowerCase();
-  return type === "image/heic" || type === "image/heif" || /\.hei[cf]$/i.test(file.name);
+  if (type === "image/heic" || type === "image/heif") return true;
+  if (/\.hei[cf]$/i.test(file.name)) return true;
+
+  // Extension/mime can lie (some transfer tools relabel HEIC as .jpg without
+  // re-encoding), so also sniff the ISOBMFF `ftyp` box for a HEIC/HEIF brand.
+  try {
+    const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+    if (header.length < 12) return false;
+    const boxType = String.fromCharCode(...header.slice(4, 8));
+    if (boxType !== "ftyp") return false;
+    const brand = String.fromCharCode(...header.slice(8, 12)).trim().toLowerCase();
+    return HEIC_BRANDS.includes(brand);
+  } catch {
+    return false;
+  }
 }
 
 async function toJpegIfHeic(file: File): Promise<File> {
-  if (!isHeic(file)) return file;
+  if (!(await isHeic(file))) return file;
   const heic2any = (await import("heic2any")).default;
   const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
   const converted = Array.isArray(result) ? result[0] : result;
@@ -118,7 +134,8 @@ function ComposerBody({
     const remaining = MAX_ATTACHMENTS - attachments.length;
     const picked = Array.from(fileList).slice(0, remaining);
 
-    const hasHeic = picked.some(isHeic);
+    const heicFlags = await Promise.all(picked.map(isHeic));
+    const hasHeic = heicFlags.some(Boolean);
     if (hasHeic) setConverting(true);
 
     for (const original of picked) {

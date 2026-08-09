@@ -128,7 +128,10 @@
       "Bash(find /c/Users/USER/Desktop/projects/saas/whispr/node_modules/heic2any -iname \"*.heic\" -o -iname \"*.heif\" 2>/dev/null | head -5 *)",
       "Read(//c//**)",
       "Bash(node check-heic.mjs)",
-      "Bash(rm -f check-heic.mjs)"
+      "Bash(rm -f check-heic.mjs)",
+      "Bash(node check-heic-sniff.mjs)",
+      "Bash(node check-jpeg-regress.mjs)",
+      "Bash(rm -f check-heic-sniff.mjs check-jpeg-regress.mjs)"
     ]
   }
 }
