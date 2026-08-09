@@ -9,6 +9,22 @@ export async function logout() {
   await signOut({ redirectTo: "/login" });
 }
 
+export async function getLatestMessageInfo() {
+  const session = await auth();
+  if (!session) return { count: 0, latestId: null };
+
+  const [count, latest] = await Promise.all([
+    prisma.message.count({ where: { receiverId: session.user.id } }),
+    prisma.message.findFirst({
+      where: { receiverId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    }),
+  ]);
+
+  return { count, latestId: latest?.id ?? null };
+}
+
 export async function deleteMessage(messageId: string) {
   const session = await auth();
   if (!session) return { error: "Not signed in" };

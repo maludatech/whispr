@@ -7,6 +7,7 @@ import { getSignedUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { ShareLinkCard } from "@/components/dashboard/share-link-card";
 import { MessageCard } from "@/components/dashboard/message-card";
+import { DashboardPoller } from "@/components/dashboard/dashboard-poller";
 import { BackgroundBlobs } from "@/components/decor/background-blobs";
 import { logout } from "./actions";
 
@@ -36,6 +37,7 @@ export default async function DashboardPage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       <BackgroundBlobs />
+      <DashboardPoller count={resolvedMessages.length} latestId={resolvedMessages[0]?.id ?? null} />
 
       <main className="relative mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-12">
         <div className="flex items-center justify-between">
