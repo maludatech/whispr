@@ -35,7 +35,9 @@ async function isHeic(file: File): Promise<boolean> {
 async function toJpegIfHeic(file: File): Promise<File> {
   if (!(await isHeic(file))) return file;
   const heic2any = (await import("heic2any")).default;
-  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.85 });
+  // Higher quality avoids visible JPEG compression artifacts around edges
+  // (blocking/ringing) that read as harsh/oversharpened, especially on faces.
+  const result = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.95 });
   const converted = Array.isArray(result) ? result[0] : result;
   return new File([converted], file.name.replace(/\.hei[cf]$/i, ".jpg") || "photo.jpg", {
     type: "image/jpeg",
