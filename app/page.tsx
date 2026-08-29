@@ -49,7 +49,7 @@ export default async function Home() {
             <Button
               render={<Link href="/dashboard" />}
               nativeButton={false}
-              className="h-13 w-full rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90"
+              className="w-full rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90 sm:px-10 sm:py-4.5 sm:text-lg"
             >
               Go to dashboard
             </Button>
@@ -59,7 +59,7 @@ export default async function Home() {
             <Button
               render={<Link href="/register" />}
               nativeButton={false}
-              className="h-13 flex-1 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90"
+              className="flex-1 rounded-full bg-linear-to-r from-violet-500 via-fuchsia-500 to-amber-400 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-fuchsia-500/30 hover:opacity-90 sm:px-10 sm:py-4.5 sm:text-lg"
             >
               Get your link
             </Button>
@@ -67,7 +67,7 @@ export default async function Home() {
               render={<Link href="/login" />}
               nativeButton={false}
               variant="outline"
-              className="h-13 flex-1 rounded-full border-white/20 bg-white/5 px-8 text-base font-semibold backdrop-blur-sm hover:bg-white/10"
+              className="flex-1 rounded-full border-white/20 bg-white/5 px-8 py-3.5 text-base font-semibold backdrop-blur-sm hover:bg-white/10 sm:px-10 sm:py-4.5 sm:text-lg"
             >
               Log in
             </Button>

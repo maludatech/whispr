@@ -216,8 +216,8 @@ export function MessageCard({ id, username, content, attachments, topic, created
             />
           }
         >
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               <TypeBadges content={content} attachments={attachments} />
               {topic && (
                 <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
@@ -225,7 +225,7 @@ export function MessageCard({ id, username, content, attachments, topic, created
                 </span>
               )}
             </div>
-            <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
+            <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">{formatDate(createdAt)}</span>
           </div>
           <MessageBody content={content} attachments={attachments} />
           <div className="mt-3 flex items-center gap-1.5 text-[10.5px] font-medium text-muted-foreground/70">
@@ -236,8 +236,8 @@ export function MessageCard({ id, username, content, attachments, topic, created
 
         <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
           <div className="flex flex-col gap-4 pt-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <TypeBadges content={content} attachments={attachments} />
                 {topic && (
                   <span className="rounded-full border border-white/10 px-2.5 py-1 text-[10.5px] font-medium text-muted-foreground">
@@ -245,7 +245,7 @@ export function MessageCard({ id, username, content, attachments, topic, created
                   </span>
                 )}
               </div>
-              <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
+              <span className="shrink-0 text-xs whitespace-nowrap text-muted-foreground">{formatDate(createdAt)}</span>
             </div>
 
             <MessageBody
