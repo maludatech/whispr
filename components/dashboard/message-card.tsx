@@ -236,7 +236,7 @@ export function MessageCard({ id, username, content, attachments, topic, created
 
         <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
           <div className="flex flex-col gap-4 pt-2">
-            <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5">
+            <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5 pr-8">
               <div className="flex flex-wrap items-center gap-1.5">
                 <TypeBadges content={content} attachments={attachments} />
                 {topic && (
