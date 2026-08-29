@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   session: {
     strategy: "jwt",
     maxAge: SEVEN_DAYS,
@@ -37,10 +38,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user }) => {
+    jwt: async ({ token, user, trigger, session }) => {
       if (user) {
         token.id = user.id;
         token.username = user.name;
+      }
+      if (trigger === "update" && session?.username) {
+        token.username = session.username;
       }
       return token;
     },

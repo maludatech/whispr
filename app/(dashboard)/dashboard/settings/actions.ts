@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { revalidatePath } from "next/cache";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { UpdateProfileSchema, ChangePasswordSchema } from "@/lib/validations/auth";
@@ -9,6 +10,7 @@ export type ProfileState =
   | {
       errors?: { username?: string[]; email?: string[] };
       message?: string;
+      username?: string;
     }
   | undefined;
 
@@ -49,7 +51,10 @@ export async function updateProfile(
     data: { username, email },
   });
 
-  await signOut({ redirectTo: "/login" });
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard");
+
+  return { username };
 }
 
 export type PasswordState =

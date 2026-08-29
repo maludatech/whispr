@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/auth/submit-button";
@@ -8,6 +10,16 @@ import { updateProfile, type ProfileState } from "@/app/(dashboard)/dashboard/se
 
 export function ProfileForm({ username, email }: { username: string; email: string }) {
   const [state, formAction] = useActionState<ProfileState, FormData>(updateProfile, undefined);
+  const { update } = useSession();
+  const syncedUsername = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (state?.username && state.username !== syncedUsername.current) {
+      syncedUsername.current = state.username;
+      update({ username: state.username });
+      toast.success("Profile updated");
+    }
+  }, [state, update]);
 
   return (
     <form action={formAction} className="space-y-4" noValidate>
@@ -48,9 +60,6 @@ export function ProfileForm({ username, email }: { username: string; email: stri
       )}
 
       <SubmitButton>Save changes</SubmitButton>
-      <p className="text-center text-xs text-muted-foreground">
-        You&apos;ll be signed out to refresh your session after saving.
-      </p>
     </form>
   );
 }
