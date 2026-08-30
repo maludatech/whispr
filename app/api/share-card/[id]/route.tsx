@@ -62,35 +62,66 @@ export async function POST(
     // no body provided — fine for non-video cards
   }
 
+  const orderedAttachments = [...message.attachments].sort(
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+  const [heroAttachment, ...restAttachments] = orderedAttachments;
+  const secondaryAttachments = restAttachments.slice(0, 4);
+
   const imageAttachment = message.attachments.find((a) => a.type === "image");
   const videoAttachment = message.attachments.find((a) => a.type === "video");
   const hasAudio = message.attachments.some((a) => a.type === "audio");
 
   let heroImageUrl: string | null = null;
-  if (imageAttachment) {
-    const signedUrl = await getSignedUrl(imageAttachment.mediaUrl);
+  if (heroAttachment?.type === "image") {
+    const signedUrl = await getSignedUrl(heroAttachment.mediaUrl);
     if (signedUrl && (await verifyImageReachable(signedUrl))) {
       heroImageUrl = signedUrl;
     }
-  } else if (videoAttachment && frameDataUrl) {
+  } else if (heroAttachment?.type === "video" && frameDataUrl) {
     heroImageUrl = frameDataUrl;
   }
 
-  const primaryType = imageAttachment
-    ? "image"
-    : videoAttachment
-      ? "video"
-      : hasAudio
-        ? "audio"
-        : "text";
+  const secondaryThumbs = await Promise.all(
+    secondaryAttachments.map(async (att) => {
+      if (att.type === "image") {
+        const signedUrl = await getSignedUrl(att.mediaUrl);
+        if (signedUrl && (await verifyImageReachable(signedUrl))) {
+          return { type: att.type, url: signedUrl };
+        }
+      }
+      return { type: att.type, url: null as string | null };
+    }),
+  );
+
+  let primaryType: "text" | "image" | "video" | "audio" = "text";
+  if (heroAttachment) {
+    primaryType = heroAttachment.type;
+  }
+  const isTextOnly = !heroAttachment;
   const username = message.receiver.username;
   const content = message.content?.trim() || null;
+  const hasSecondary = secondaryThumbs.length > 0;
 
   const allTypes: ("text" | "image" | "video" | "audio")[] = [];
   if (content) allTypes.push("text");
   if (imageAttachment) allTypes.push("image");
   if (videoAttachment) allTypes.push("video");
   if (hasAudio) allTypes.push("audio");
+
+  const THUMB_ICON: Record<"image" | "video" | "audio", string> = {
+    image: "🖼️",
+    video: "🎬",
+    audio: "🎤",
+  };
+
+  const heroHeight = hasSecondary
+    ? content
+      ? 850
+      : 1000
+    : content
+      ? 1120
+      : 1350;
 
   return new ImageResponse(
     (
@@ -162,7 +193,7 @@ export async function POST(
               style={{
                 display: "flex",
                 width: "100%",
-                height: content ? 1120 : 1350,
+                height: heroHeight,
                 borderRadius: 40,
                 overflow: "hidden",
                 position: "relative",
@@ -173,10 +204,10 @@ export async function POST(
                 src={heroImageUrl}
                 alt=""
                 width={WIDTH - 112}
-                height={content ? 1120 : 1350}
+                height={heroHeight}
                 style={{ objectFit: "cover" }}
               />
-              {videoAttachment && (
+              {heroAttachment?.type === "video" && (
                 <div
                   style={{
                     position: "absolute",
@@ -310,7 +341,48 @@ export async function POST(
             </div>
           ) : null}
 
-          {content && !heroImageUrl && primaryType === "text" && (
+          {hasSecondary && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginTop: 24, width: "100%" }}>
+              {secondaryThumbs.map((thumb, index) => (
+                <div
+                  key={secondaryAttachments[index].id}
+                  style={{
+                    display: "flex",
+                    position: "relative",
+                    width: 220,
+                    height: 220,
+                    borderRadius: 24,
+                    overflow: "hidden",
+                    backgroundColor: "rgba(255,255,255,0.06)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {thumb.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={thumb.url} alt="" width={220} height={220} style={{ objectFit: "cover" }} />
+                  ) : (
+                    <div style={{ display: "flex", fontSize: 84 }}>{THUMB_ICON[thumb.type]}</div>
+                  )}
+                  {thumb.type === "video" && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        bottom: 10,
+                        right: 10,
+                        display: "flex",
+                        fontSize: 30,
+                      }}
+                    >
+                      ▶
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {content && !heroImageUrl && isTextOnly && (
             <div
               style={{
                 display: "flex",
@@ -329,8 +401,8 @@ export async function POST(
             <div
               style={{
                 display: "flex",
-                marginTop: heroImageUrl ? 40 : primaryType !== "text" ? 56 : 0,
-                fontSize: heroImageUrl ? 52 : primaryType !== "text" ? 44 : 84,
+                marginTop: heroImageUrl ? 40 : !isTextOnly ? 56 : 0,
+                fontSize: heroImageUrl ? 52 : !isTextOnly ? 44 : 84,
                 fontWeight: 700,
                 color: "#ffffff",
                 textAlign: "center",
