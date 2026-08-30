@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Loader2, Trash2, Maximize2 } from "lucide-react";
 import {
   Dialog,
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { ShareRow } from "@/components/dashboard/share-row";
+import { ShareCardButton } from "@/components/dashboard/share-card-button";
 import { MediaLightbox } from "@/components/dashboard/media-lightbox";
 import { deleteMessage } from "@/app/(dashboard)/dashboard/actions";
 
@@ -193,6 +194,9 @@ export function MessageCard({ id, username, content, attachments, topic, created
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const modalContentRef = useRef<HTMLDivElement>(null);
+
+  const hasVideo = attachments.some((a) => a.type === "video");
 
   const visualAttachments = attachments.filter(
     (a): a is Attachment & { type: "image" | "video" } => a.type === "image" || a.type === "video",
@@ -235,7 +239,7 @@ export function MessageCard({ id, username, content, attachments, topic, created
         </DialogTrigger>
 
         <DialogContent className="max-w-md sm:max-w-lg" showCloseButton>
-          <div className="flex flex-col gap-4 pt-2">
+          <div ref={modalContentRef} className="flex flex-col gap-4 pt-2">
             <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5 pr-8">
               <div className="flex flex-wrap items-center gap-1.5">
                 <TypeBadges content={content} attachments={attachments} />
@@ -254,6 +258,8 @@ export function MessageCard({ id, username, content, attachments, topic, created
               full
               onMediaClick={setLightboxIndex}
             />
+
+            <ShareCardButton messageId={id} hasVideo={hasVideo} containerRef={modalContentRef} />
 
             <ShareRow username={username} />
 
