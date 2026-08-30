@@ -83,9 +83,14 @@ export async function POST(
       : hasAudio
         ? "audio"
         : "text";
-  const topicColor = TOPIC_COLORS[primaryType];
   const username = message.receiver.username;
   const content = message.content?.trim() || null;
+
+  const allTypes: ("text" | "image" | "video" | "audio")[] = [];
+  if (content) allTypes.push("text");
+  if (imageAttachment) allTypes.push("image");
+  if (videoAttachment) allTypes.push("video");
+  if (hasAudio) allTypes.push("audio");
 
   return new ImageResponse(
     (
@@ -103,22 +108,25 @@ export async function POST(
         }}
       >
         {/* Badges */}
-        <div style={{ display: "flex", gap: 12 }}>
-          <div
-            style={{
-              display: "flex",
-              padding: "12px 28px",
-              borderRadius: 999,
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              backgroundColor: topicColor.bg,
-              color: topicColor.fg,
-            }}
-          >
-            {primaryType}
-          </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+          {allTypes.map((type) => (
+            <div
+              key={type}
+              style={{
+                display: "flex",
+                padding: "12px 28px",
+                borderRadius: 999,
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: 1,
+                textTransform: "uppercase",
+                backgroundColor: TOPIC_COLORS[type].bg,
+                color: TOPIC_COLORS[type].fg,
+              }}
+            >
+              {type}
+            </div>
+          ))}
           {message.topic && (
             <div
               style={{
