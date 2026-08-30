@@ -134,13 +134,8 @@ function VisualGrid({
       {tiles.map((item, index) => {
         const isLastTile = index === tiles.length - 1;
         const showOverflow = isLastTile && overflowCount > 0;
-        return (
-          <button
-            type="button"
-            key={item.id}
-            onClick={onItemClick ? () => onItemClick(index) : undefined}
-            className={`relative aspect-square overflow-hidden rounded-xl bg-black/40 ${onItemClick ? "cursor-pointer" : ""}`}
-          >
+        const tileContent = (
+          <>
             {item.type === "image" ? (
               <img src={item.mediaUrl} alt="Anonymous submission" className="size-full object-cover" />
             ) : (
@@ -156,7 +151,23 @@ function VisualGrid({
                 +{overflowCount}
               </div>
             )}
+          </>
+        );
+        const tileClassName = "relative aspect-square overflow-hidden rounded-xl bg-black/40";
+
+        return onItemClick ? (
+          <button
+            type="button"
+            key={item.id}
+            onClick={() => onItemClick(index)}
+            className={`${tileClassName} cursor-pointer`}
+          >
+            {tileContent}
           </button>
+        ) : (
+          <div key={item.id} className={tileClassName}>
+            {tileContent}
+          </div>
         );
       })}
     </div>
@@ -259,9 +270,9 @@ export function MessageCard({ id, username, content, attachments, topic, created
               onMediaClick={setLightboxIndex}
             />
 
-            <ShareCardButton messageId={id} hasVideo={hasVideo} containerRef={modalContentRef} />
-
             <ShareRow username={username} />
+
+            <ShareCardButton messageId={id} hasVideo={hasVideo} containerRef={modalContentRef} />
 
             <AlertDialog>
               <AlertDialogTrigger

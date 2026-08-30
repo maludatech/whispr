@@ -16,6 +16,22 @@ const TOPIC_COLORS: Record<string, { bg: string; fg: string }> = {
   audio: { bg: "rgba(245,158,11,0.18)", fg: "#fcd34d" },
 };
 
+// Satori fetches remote <img> URLs during render; an expired/missing/slow
+// source would otherwise take the whole card down with it. Verify it's
+// actually fetchable first so we can fall back to the icon/text treatment
+// instead of hard-failing the request.
+async function verifyImageReachable(url: string, timeoutMs = 4000): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -52,7 +68,10 @@ export async function POST(
 
   let heroImageUrl: string | null = null;
   if (imageAttachment) {
-    heroImageUrl = await getSignedUrl(imageAttachment.mediaUrl);
+    const signedUrl = await getSignedUrl(imageAttachment.mediaUrl);
+    if (signedUrl && (await verifyImageReachable(signedUrl))) {
+      heroImageUrl = signedUrl;
+    }
   } else if (videoAttachment && frameDataUrl) {
     heroImageUrl = frameDataUrl;
   }
@@ -242,6 +261,43 @@ export async function POST(
                 }}
               >
                 Video message
+              </div>
+            </div>
+          ) : primaryType === "image" ? (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  width: 460,
+                  height: 460,
+                  borderRadius: 90,
+                  background:
+                    "linear-gradient(135deg, #8b5cf6, #d946ef 50%, #f59e0b)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 200,
+                  marginBottom: 48,
+                }}
+              >
+                🖼️
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  fontSize: 46,
+                  fontWeight: 700,
+                  letterSpacing: 2,
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.55)",
+                }}
+              >
+                Image message
               </div>
             </div>
           ) : null}
