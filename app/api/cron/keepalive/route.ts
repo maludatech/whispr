@@ -14,9 +14,14 @@ export async function GET(req: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const [userCount, storageResult] = await Promise.all([
+  const [userCount, storageResult, authResult] = await Promise.all([
     prisma.user.count(),
     supabaseAdmin.storage.from(STORAGE_BUCKET).list("", { limit: 1 }),
+    // Whispr's own data lives in Neon, not Supabase's Postgres — the only
+    // thing this project ever asks Supabase's DB for is auth.users, via the
+    // admin API. Storage-only traffic may not register as "activity" against
+    // Supabase's own database for their inactivity scan, so ping this too.
+    supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1 }),
   ]);
 
   return Response.json({
@@ -24,5 +29,6 @@ export async function GET(req: Request) {
     ts: Date.now(),
     db: { reachable: true, userCount },
     storage: { reachable: !storageResult.error, error: storageResult.error?.message ?? null },
+    supabaseAuth: { reachable: !authResult.error, error: authResult.error?.message ?? null },
   });
 }
