@@ -3,7 +3,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = "Whispr <whispr@driftfund.net>";
+const FROM = "Whispr <whispr@maludatech.com>";
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const { error } = await resend.emails.send({
